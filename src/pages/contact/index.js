@@ -144,7 +144,7 @@ const backgroundImage = useMotionTemplate`radial-gradient(100% 100% at 50% 0%, #
               <input type='text' placeholder='name' className='input'/>
               <input type='text' placeholder='address' className='input'/>
             </div>
-              <input type=' text' placeholder='email' className='input'/>
+              <input type=' text' placeholder='email' className='input lowercase'/>
               <textarea placeholder='message' className=' textarea'></textarea>
               <Link href="mailto:youremail@example.com?subject=Let's%20Talk&body=Hi%20there%2C%20I%20would%20like%20to%20talk%20about..." 
               className=' btn rounded-full border border-white/50 max-w-[170px] px-8 transition-all duration-300 flex items-center justify-center overflow-hiwdden hover:border-[#F13024] group'>
