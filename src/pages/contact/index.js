@@ -1,7 +1,6 @@
 import { 
   BsArrowRight 
 } from 'react-icons/bs';
-import Curve from '@/components/Curve';
 import React, { useEffect } from "react";
 import { 
   FiArrowRight, 
@@ -14,8 +13,8 @@ import {
   motion, 
   animate,
 } from "framer-motion";
-import Link from 'next/link';
 import { fadeIn } from '@/variants';
+import Link from 'next/link';
 
 const Phone = () => {
   return (
@@ -119,7 +118,7 @@ const backgroundImage = useMotionTemplate`radial-gradient(100% 100% at 50% 0%, #
         initial='hidden'
         animate='show'
         exit='hidden'
-        className="h2 mb-10 md:block hidden text-center">Contact Me<span className='text-accent'>.</span></motion.h2>
+        className="h2 mb-10 md:block hidden text-center">Contact Me<span className='text-[#F13024]'>.</span></motion.h2>
         <div className='container flex flex-col items-center mx-auto xl:flex-row px-2 gap-x-2 py-10'>
         <motion.section
         variants={fadeIn('down', 0.5)}
@@ -134,7 +133,7 @@ const backgroundImage = useMotionTemplate`radial-gradient(100% 100% at 50% 0%, #
         initial='hidden'
         animate='show'
         exit='hidden'
-        className="h2 mb-10 block md:hidden text-center">Contact Me<span className='text-accent'>.</span></motion.h2>
+        className="h2 mb-10 block md:hidden text-center">Contact Me<span className='text-[#F13024]'>.</span></motion.h2>
         <motion.form
            variants={fadeIn('up', 0.4)}
            initial='hidden'
@@ -143,14 +142,15 @@ const backgroundImage = useMotionTemplate`radial-gradient(100% 100% at 50% 0%, #
           className=' flex-1 flex flex-col gap-6 w-full mx-auto'>
             <div className='flex gap-x-6 w-full'> 
               <input type='text' placeholder='name' className='input'/>
-              <input type='text' placeholder='email' className='input'/>
+              <input type='text' placeholder='address' className='input'/>
             </div>
               <input type=' text' placeholder='email' className='input'/>
               <textarea placeholder='message' className=' textarea'></textarea>
-              <button className=' btn rounded-full border border-white/50 max-w-[170px] px-8 transition-all duration-300 flex items-center justify-center overflow-hidden hover:border-accent group'>
+              <Link href="mailto:youremail@example.com?subject=Let's%20Talk&body=Hi%20there%2C%20I%20would%20like%20to%20talk%20about..." 
+              className=' btn rounded-full border border-white/50 max-w-[170px] px-8 transition-all duration-300 flex items-center justify-center overflow-hiwdden hover:border-[#F13024] group'>
                 <span className=' group-hover:-translate-y-[120%] group-hover:opacity-0 transition-all duration-500 '>Let&apos;s talk</span>
                 <BsArrowRight className='-translate-x-[120%] opacity-0 group-hover:flex group-hover:-translate-x-0 group-hover:opacity-100 transition-all duration-300 absolute text-[22px]' />
-              </button>
+              </Link>
         </motion.form>
         </div>
       </div>

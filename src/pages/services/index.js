@@ -124,7 +124,7 @@ const backgroundImage = useMotionTemplate`radial-gradient(125% 125% at 50% 0%, #
     }}
      className="min-h-screen">
       <div className="py-36">
-        <h1 className="h1 text-center text-white">Our Services<span className="text-3xl text-accent">.</span></h1>
+        <h1 className="h1 text-center text-white">Our Services<span className="text-3xl text-[#F13024]">.</span></h1>
         <motion.p
           variants={fadeIn('up', 0.4)}
           initial='hidden'
@@ -145,7 +145,7 @@ const backgroundImage = useMotionTemplate`radial-gradient(125% 125% at 50% 0%, #
               <div className="text-4xl mb-4">
                 {service.icon}
               </div>
-              <h2 className="text-xl font-semibold mb-2 text-accent">{service.title}</h2>
+              <h2 className="text-xl font-semibold mb-2 text-[#F13024]">{service.title}</h2>
               <p className="text-base text-white">{service.description}</p>
             </motion.div>
           ))}

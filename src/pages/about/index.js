@@ -84,7 +84,7 @@ const FlipText = ({children}) => {
     <motion.span
       initial="initial"
       whileHover="hovered"
-      className="relative inline-flex overflow-hidden text-3xl uppercase sm:text-3xl md:text-4xl lg:text-5xl text-accent"
+      className="relative inline-flex overflow-hidden text-3xl uppercase sm:text-3xl md:text-4xl lg:text-5xl text-[#F13024]"
       style={{
         lineHeight: 0.80,
       }}
@@ -179,7 +179,7 @@ export default function Index() {
           <p className="mb-4 text-white max-w-[500px] mx-auto text-center">
             I&apos;m Ogo Joshua, a solo passionate freelance developer dedicated to creating innovative solutions. Our mission is to deliver high-quality software that exceeds our clients&apos; expectations.
           </p>
-           <p className="mb-4 text-white text-center"><span className="text-accent">PS:</span> I also go by the Alias Of ByteProwler  || The Founder Of ByteCorp  ||</p>
+           <p className="mb-4 text-white text-center"><span className="text-[#F13024]">PS:</span> I also go by the Alias Of ByteProwler  || The Founder Of ByteCorp  ||</p>
           <p className="mb-4 text-white">
             Our expertise spans across various domains, including web development, mobile apps, and AI-driven applications. We believe in the power of technology to transform businesses and improve lives.
           </p>
@@ -218,28 +218,28 @@ export default function Index() {
             <div className="flex flex-1 xl:gap-x-6">
               {/* Experience */}
               <div className="relative flex-1 after:w-[1px] after:h-full after:bg-white/10 after:absolute after:top-0 after:right-0">
-                <div className="text-2xl xl:text-4xl font-extrabold text-accent mb-2">
+                <div className="text-2xl xl:text-4xl font-extrabold text-[#F13024] mb-2">
                   <CountUp start={0} end={6} duration={5} />+
                 </div>
                 <div className="text-xs uppercase tracking-[1px] leading-[1.4] max-w-[100px]">Months of experience</div>
               </div>
               {/* Clients */}
               <div className="relative flex-1 after:w-[1px] after:h-full after:bg-white/10 after:absolute after:top-0 after:right-0">
-                <div className="text-2xl xl:text-4xl font-extrabold text-accent mb-2">
+                <div className="text-2xl xl:text-4xl font-extrabold text-[#F13024] mb-2">
                   <CountUp start={0} end={2} duration={10} />+
                 </div>
                 <div className="text-xs uppercase tracking-[1px] leading-[1.4] max-w-[100px]">Satisfied clients</div>
               </div>
               {/* Projects */}
               <div className="relative flex-1 after:w-[1px] after:h-full after:bg-white/10 after:absolute after:top-0 after:right-0">
-                <div className="text-2xl xl:text-4xl font-extrabold text-accent mb-2">
+                <div className="text-2xl xl:text-4xl font-extrabold text-[#F13024] mb-2">
                   <CountUp start={0} end={3} duration={5} />+
                 </div>
                 <div className="text-xs uppercase tracking-[1px] leading-[1.4] max-w-[100px]">Finished projects</div>
               </div>
               {/* Technologies */}
               <div className="flex-1">
-                <div className="text-2xl xl:text-4xl font-extrabold text-accent mb-2">
+                <div className="text-2xl xl:text-4xl font-extrabold text-[#F13024] mb-2">
                   <CountUp start={0} end={6} duration={6} />
                 </div>
                 <div className="text-xs uppercase tracking-[1px] leading-[1.4] max-w-[100px]">Technologies used</div>
@@ -259,8 +259,8 @@ export default function Index() {
             {aboutData.map((item, itemIndex) => (
               <div
                 key={itemIndex}
-                className={`cursor-pointer capitalize xl:text-lg relative after:w-8 after:h-[2px] after:bg-accent after:absolute after:-bottom-1 after:left-0 ${
-                  index === itemIndex && 'text-accent after:w-[100%] after:bg-accent after:transition-all after:duration-300'
+                className={`cursor-pointer capitalize xl:text-lg relative after:w-8 after:h-[2px] after:bg-[#F13024] after:absolute after:-bottom-1 after:left-0 ${
+                  index === itemIndex && 'text-[#F13024] after:w-[100%] after:bg-[#F13024] after:transition-all after:duration-300'
                 }`}
                 onClick={() => setIndex(itemIndex)}
               >

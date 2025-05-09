@@ -126,7 +126,7 @@ const color = useMotionValue(COLORS_TOP[0]);
         initial="hidden"
         animate="show"
         exit="hidden"
-        className='h1 text-center text-white'>My Projects<span className='text-accent'>.</span></motion.h2>
+        className='h1 text-center text-white'>My Projects<span className='text-[#F13024]'>.</span></motion.h2>
         <motion.p
         variants={fadeIn('up', .5)}
         initial="hidden"

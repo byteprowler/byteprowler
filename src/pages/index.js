@@ -15,7 +15,7 @@ const FlipText = ({children}) => {
     <motion.span
       initial="initial"
       whileHover="hovered"
-      className="relative block overflow-hidden whitespace-nowrap text-4xl font-black uppercase sm:text-4xl md:text-6xl lg:text-7xl text-accent"
+      className="relative block overflow-hidden whitespace-nowrap text-4xl font-black uppercase sm:text-4xl md:text-6xl lg:text-7xl text-[#F13024]"
       style={{
         lineHeight: 0.85,
       }}
