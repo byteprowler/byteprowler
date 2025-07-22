@@ -48,17 +48,17 @@ Tools: Git, GitHub, VS Code, Figma, Netlify, Vercel
 ---
 
 ### 📊 GitHub Stats
-<p align="center"> <img src="https://github-readme-stats.vercel.app/api?username=byteprowler&show_icons=true&theme=radical&hide=issues" /> <img src="https://github-readme-streak-stats.herokuapp.com?user=byteprowler&theme=radical&date_format=M%20j%5B%2C%20Y%5D" /> <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=byteprowler&layout=compact&theme=radical&hide=php" /> </p>
+<p align="center"> <img src="https://github-readme-stats.vercel.app/api?username=byteprowler&show_icons=true&theme=radical&hide=issues" /> <img src="https://streak-stats.demolab.com/?user=byteprowler&theme=radical&date_format=M%20j%5B%2C%20Y%5D" /> <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=byteprowler&layout=compact&theme=radical&hide=php" /> </p>
 
 ---
 
 ### 🛠️ My Stack Icons
-<p align="center"> <img src="https://skillicons.dev/icons?i=html,css,js,ts,react,nextjs,tailwind,python,django,git,github,figma" /> </p> ```
+<p align="center"> <img src="https://skillicons.dev/icons?i=html,css,js,ts,react,nextjs,tailwind,python,django,git,github,figma" /> </p>
 
 ---
 
 ### ✨ Anime Quote of the Day
-**(For fun, use this if you're into anime like me ↓)**
-<p align="center"> <img src="https://animechan.vercel.app/api/random.png" alt="Anime Quote" /> </p>
+> “Power comes in response to a need, not a desire. You have to create that need.”  
+> — **Goku**, *Dragon Ball Z*
 
 ---
