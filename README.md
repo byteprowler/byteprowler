@@ -48,7 +48,7 @@ Tools: Git, GitHub, VS Code, Figma, Netlify, Vercel
 ---
 
 ### 📊 GitHub Stats
-<p align="center"> <img src="https://github-readme-stats.vercel.app/api?username=byteprowler&show_icons=true&theme=radical&hide=issues" /> <img src="https://streak-stats.demolab.com/?user=byteprowler&theme=radical&date_format=M%20j%5B%2C%20Y%5D" /> <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=byteprowler&layout=compact&theme=radical&hide=php" /> </p>
+<p align="center"> <img src="https://github-readme-stats.vercel.app/api?username=byteprowler&show_icons=true&theme=radical&hide=issues" /> <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=byteprowler&layout=compact&theme=radical&hide=php" /> <img src="https://streak-stats.demolab.com/?user=byteprowler&theme=radical&date_format=M%20j%5B%2C%20Y%5D" />  </p>
 
 ---
 
