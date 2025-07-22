@@ -8,7 +8,7 @@ Night watcher for all things web3 🌙
 - **Frameworks:** Django, NextJS
 
 ## 🌟 Favorite Projects
-- **Jlpowertools** — My top pick!
+- **[J & L Powertools](https://jlpowertools.biz)** — My top pick!
 
 ## 🎓 Education
 - Aspiring university student, always hungry to learn and grow!
