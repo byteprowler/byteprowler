@@ -1,4 +1,4 @@
-# 👋 Hey there, I’m Ogo Joshua — aka [ByteProwler](https://byteprowler.vercel.app) ⚡
+# 👋 Hey there, I’m Joshua Ogo — aka [ByteProwler](https://byteprowler.vercel.app) ⚡
 
 Welcome to my space on GitHub, where ideas turn into sleek, functional code.
 
