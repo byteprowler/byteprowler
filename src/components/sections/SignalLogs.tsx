@@ -33,6 +33,7 @@ function formatActivityDate(createdAt: number) {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: "UTC",
     }).format(new Date(createdAt * 1000));
   } catch {
     return "RECENT";
@@ -44,6 +45,7 @@ function formatSyncTime(updatedAt: number) {
   return new Intl.DateTimeFormat("en", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
   }).format(new Date(updatedAt));
 }
 
@@ -166,9 +168,9 @@ function MusicLogPanel() {
     refetchOnWindowFocus: true,
   });
 
-  const tracks = (data?.tracks || []).slice(0, 6);
+  const tracks = (data?.tracks || []).slice(0, 5);
   const nowPlaying = tracks.find((track) => track.nowPlaying);
-  const recentTracks = (nowPlaying ? tracks.filter((track) => !track.nowPlaying) : tracks).slice(0, nowPlaying ? 6 : 6);
+  const recentTracks = (nowPlaying ? tracks.filter((track) => !track.nowPlaying) : tracks).slice(0, nowPlaying ? 4 : 5);
   const isUnconfigured = data?.configured === false || data?.message === "LASTFM_CONFIG_MISSING";
   const isOffline = !!error || data?.message === "LASTFM_SIGNAL_OFFLINE";
   const header = (

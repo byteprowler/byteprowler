@@ -16,12 +16,15 @@ export interface AniListAnime {
   siteUrl: string;
 }
 
+export type AniListActivityKind = "completed" | "watching" | "reading" | "planning" | "progress";
+
 export interface AniListActivityItem {
   id: string;
   action: string;
+  kind?: AniListActivityKind;
   progress?: string;
   title: string;
-  mediaType?: string;
+  mediaType?: "ANIME" | "MANGA" | string;
   mediaFormat?: string;
   coverImage?: string;
   url?: string;
@@ -40,7 +43,7 @@ export const fallbackAnimeList: AniListAnime[] = [
     episodes: 16,
     status: "FINISHED",
     genres: ["Action", "Drama", "Fantasy", "Mystery"],
-    siteUrl: "https://anilist.co/anime/110277"
+    siteUrl: "https://anilist.co/anime/110277",
   },
   {
     id: 113415,
@@ -51,7 +54,7 @@ export const fallbackAnimeList: AniListAnime[] = [
     episodes: 24,
     status: "FINISHED",
     genres: ["Action", "Fantasy", "Mystery"],
-    siteUrl: "https://anilist.co/anime/113415"
+    siteUrl: "https://anilist.co/anime/113415",
   },
   {
     id: 21519,
@@ -62,7 +65,7 @@ export const fallbackAnimeList: AniListAnime[] = [
     episodes: 51,
     status: "FINISHED",
     genres: ["Action", "Comedy", "Sci-Fi"],
-    siteUrl: "https://anilist.co/anime/21519"
+    siteUrl: "https://anilist.co/anime/21519",
   },
   {
     id: 11061,
@@ -73,8 +76,67 @@ export const fallbackAnimeList: AniListAnime[] = [
     episodes: 148,
     status: "FINISHED",
     genres: ["Action", "Adventure", "Fantasy"],
-    siteUrl: "https://anilist.co/anime/11061"
-  }
+    siteUrl: "https://anilist.co/anime/11061",
+  },
+];
+
+export const fallbackActivityList: AniListActivityItem[] = [
+  {
+    id: "act-1",
+    action: "completed",
+    kind: "completed",
+    progress: "All 16 Episodes",
+    title: "Attack on Titan: The Final Season",
+    mediaType: "ANIME",
+    mediaFormat: "TV",
+    coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx110277-O7vJXDg77r7q.png",
+    url: "https://anilist.co/anime/110277",
+    createdAt: Math.floor(Date.now() / 1000) - 3600 * 4,
+    likes: 42,
+    replies: 7,
+  },
+  {
+    id: "act-2",
+    action: "read chapter",
+    kind: "reading",
+    progress: "Chapter 168",
+    title: "Chainsaw Man",
+    mediaType: "MANGA",
+    mediaFormat: "MANGA",
+    coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx117589-O7vJXDg77r7q.png",
+    url: "https://anilist.co/manga/105778",
+    createdAt: Math.floor(Date.now() / 1000) - 3600 * 12,
+    likes: 19,
+    replies: 2,
+  },
+  {
+    id: "act-3",
+    action: "watched episode",
+    kind: "watching",
+    progress: "Episode 12",
+    title: "Jujutsu Kaisen Season 2",
+    mediaType: "ANIME",
+    mediaFormat: "TV",
+    coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx113415-8t9v7Z7ZdT9j.png",
+    url: "https://anilist.co/anime/113415",
+    createdAt: Math.floor(Date.now() / 1000) - 3600 * 28,
+    likes: 31,
+    replies: 4,
+  },
+  {
+    id: "act-4",
+    action: "plans to read",
+    kind: "planning",
+    progress: "Volume 1",
+    title: "Solo Leveling",
+    mediaType: "MANGA",
+    mediaFormat: "MANGA",
+    coverImage: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx11061-f9b6Maas9g9g.png",
+    url: "https://anilist.co/manga/105398",
+    createdAt: Math.floor(Date.now() / 1000) - 3600 * 48,
+    likes: 15,
+    replies: 1,
+  },
 ];
 
 const ANILIST_API_URL = "https://graphql.anilist.co";
@@ -145,7 +207,7 @@ interface AniListGraphQlError {
   message?: string;
 }
 
-interface AniListActivityNode {
+export interface AniListActivityNode {
   id?: number;
   status?: string;
   progress?: string;
@@ -185,18 +247,31 @@ async function requestAniList<T>(query: string, variables: Record<string, unknow
   return result.data as T;
 }
 
-function normalizeActivity(node: AniListActivityNode): AniListActivityItem | null {
+export function determineActivityKind(action: string, progress?: string): AniListActivityKind {
+  const lower = (action || "").toLowerCase();
+  if (lower.includes("completed")) return "completed";
+  if (lower.includes("plan")) return "planning";
+  if (lower.includes("watch")) return "watching";
+  if (lower.includes("read")) return "reading";
+  if (progress) return "progress";
+  return "watching";
+}
+
+export function normalizeActivity(node: AniListActivityNode): AniListActivityItem | null {
   if (!node.id || !node.media) return null;
 
   const title = node.media.title?.english || node.media.title?.romaji || "Unknown media";
+  const action = node.status || "updated";
+  const progress = node.progress || undefined;
 
   return {
     id: String(node.id),
-    action: node.status || "updated",
-    progress: node.progress || undefined,
+    action,
+    kind: determineActivityKind(action, progress),
+    progress,
     title,
-    mediaType: node.media.type,
-    mediaFormat: node.media.format,
+    mediaType: node.media.type || "ANIME",
+    mediaFormat: node.media.format || "MEDIA",
     coverImage: node.media.coverImage?.medium || node.media.coverImage?.large,
     url: node.siteUrl || node.media.siteUrl,
     createdAt: node.createdAt || 0,
@@ -246,14 +321,13 @@ export async function fetchFavoriteAnime(username: string): Promise<AniListAnime
 export const fetchUserFavourites = fetchFavoriteAnime;
 
 export async function fetchAniListActivity(
-  username: string, 
-  limit = 6
-): 
-Promise<AniListActivityItem[]> {
+  username: string,
+  limit = 5
+): Promise<AniListActivityItem[]> {
   const cleanUsername = username.trim();
   if (!cleanUsername) return [];
 
-  const safeLimit = Math.min(Math.max(limit, 1), 6);
+  const safeLimit = Math.min(Math.max(limit, 1), 10);
   const userData = await requestAniList<{ User?: { id?: number } }>(GET_USER_ID_QUERY, {
     username: cleanUsername,
   });
@@ -263,7 +337,7 @@ Promise<AniListActivityItem[]> {
 
   const activityData = await requestAniList<{ Page?: { activities?: AniListActivityNode[] } }>(
     GET_USER_ACTIVITY_BY_ID_QUERY,
-    { userId, limit: safeLimit },
+    { userId, limit: safeLimit }
   );
 
   return (activityData.Page?.activities || [])

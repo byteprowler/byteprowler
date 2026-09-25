@@ -12,6 +12,7 @@ function formatDate(value?: string) {
       month: "short",
       day: "numeric",
       year: "numeric",
+      timeZone: "UTC",
     }).format(new Date(value));
   } catch {
     return "--";
