@@ -1,220 +1,388 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowLeft, Cpu, Database, Search, Terminal, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Cpu,
+  Filter,
+  RefreshCw,
+  Search,
+  Sparkles,
+  Terminal,
+  X,
+} from "lucide-react";
 import Layout from "../components/layout/Layout";
 import SEO from "../components/seo/SEO";
-import { techCategories, techStack, type TechCategoryId, type TechItem } from "../lib/content/techStack";
-
-const statusClasses: Record<TechItem["status"], string> = {
-  CORE: "border-neon-lime/30 bg-neon-lime/10 text-neon-lime",
-  ACTIVE: "border-neon-blue/30 bg-neon-blue/10 text-neon-blue",
-  LEARNING: "border-neon-purple/30 bg-neon-purple/10 text-neon-purple",
-};
-
-function categoryLabel(category: TechItem["category"]) {
-  return techCategories.find((item) => item.id === category)?.label ?? category;
-}
-
-function experienceLabel(experience = 0) {
-  return experience === 1 ? "1 YEAR" : `${experience} YEARS`;
-}
+import TechCard from "../components/ui/TechCard";
+import TechDetailModal from "../components/ui/TechDetailModal";
+import {
+  techCategories,
+  techStack,
+  isCategoryMatch,
+  normalizeCategory,
+  type TechCategoryId,
+  type TechItem,
+  type TechStatus,
+} from "../lib/content/techStack";
 
 export default function TechArsenalPage() {
   const [query, setQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<TechCategoryId>("ALL");
+  const [activeCategory, setActiveCategory] = useState<TechCategoryId>("ALL_SYSTEMS");
+  const [selectedStatus, setSelectedStatus] = useState<"ALL" | TechStatus>("ALL");
   const [selectedTech, setSelectedTech] = useState<TechItem | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string>("NODE_001");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const shouldReduceMotion = useReducedMotion();
 
+  // Global keyboard shortcut to focus search with '/'
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Filtered tech stack calculation
   const filteredTech = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
     return techStack.filter((tech) => {
-      const matchesCategory = activeCategory === "ALL" || tech.category === activeCategory;
-      const searchableText = [tech.name, tech.description, tech.category, tech.status].join(" ").toLowerCase();
-      return matchesCategory && (!normalizedQuery || searchableText.includes(normalizedQuery));
+      // Category match
+      const matchesCategory = isCategoryMatch(tech.category, activeCategory);
+
+      // Status match
+      const matchesStatus = selectedStatus === "ALL" || tech.status === selectedStatus;
+
+      // Text search match across name, description, category, status, and highlights
+      const searchBlob = [
+        tech.name,
+        tech.description ?? "",
+        normalizeCategory(tech.category),
+        tech.status,
+        tech.nodeId ?? "",
+        ...(tech.highlights ?? []),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch = !normalizedQuery || searchBlob.includes(normalizedQuery);
+
+      return matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [activeCategory, query]);
+  }, [activeCategory, query, selectedStatus]);
 
-  useEffect(() => {
-    if (!selectedTech) return;
-
-    closeButtonRef.current?.focus();
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSelectedTech(null);
+  // Compute item counts for each category
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      ALL_SYSTEMS: techStack.length,
     };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [selectedTech]);
+    for (const cat of techCategories) {
+      if (cat.id === "ALL_SYSTEMS") continue;
+      counts[cat.id] = techStack.filter((tech) => isCategoryMatch(tech.category, cat.id)).length;
+    }
+
+    return counts;
+  }, []);
+
+  const handleCardClick = useCallback((tech: TechItem, nodeId: string) => {
+    setSelectedTech(tech);
+    setSelectedNodeId(nodeId);
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setQuery("");
+    setActiveCategory("ALL_SYSTEMS");
+    setSelectedStatus("ALL");
+  }, []);
 
   return (
     <>
       <SEO
-        title="Tech Arsenal | Byteprowler"
-        description="Search the full Byteprowler technology arsenal, including frontend systems, frameworks, backend tools, scripting, and development workflow." 
+        title="Tech Arsenal | Byteprowler Database"
+        description="Search the complete Byteprowler technology database, including frontend core, frameworks, styling, backend systems, and development workflow."
         url="PASTE_CANONICAL_URL_HERE/tech-arsenal"
         image="/og-byteprowler.png"
       />
 
       <Layout>
-        <section className="py-10 md:py-16" aria-labelledby="arsenal-title">
-          <div className="mb-8 border-b border-white/5 pb-6">
+        <div className="py-8 md:py-14 min-h-screen">
+          {/* Top Breadcrumb & Terminal HUD */}
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4 font-mono text-xs uppercase tracking-wider text-gray-400">
             <Link
               href="/#tech"
-              className="mb-6 inline-flex min-h-10 items-center gap-2 rounded-sm border border-white/10 bg-black/45 px-3 py-2 font-mono text-[11px] font-black uppercase tracking-widest text-neon-lime transition hover:border-neon-lime/40 hover:bg-neon-lime/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian"
+              className="inline-flex min-h-10 items-center gap-2 rounded-xs border border-white/10 bg-black/50 px-3 py-2 text-neon-lime transition hover:border-neon-lime hover:bg-neon-lime/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime"
             >
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              BACK_TO_STACK_PREVIEW
+              <span>RETURN_TO_HOMEPAGE_PREVIEW</span>
             </Link>
 
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-gray-400">
-                <Terminal className="h-4 w-4 text-neon-lime" aria-hidden="true" />
-                <span className="font-black text-neon-lime">TECH_ARSENAL // FULL_SYSTEM_ACCESS</span>
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:inline text-gray-400">HOST: BYTEPROWLER_KERNEL</span>
+              <span className="flex items-center gap-1.5 text-neon-lime font-bold">
+                <span className="h-2 w-2 rounded-full bg-neon-lime animate-pulse" aria-hidden="true" />
+                SYSTEM STATUS: ONLINE
+              </span>
+            </div>
+          </div>
+
+          {/* Terminal-Inspired Page Header */}
+          <header className="mb-8 rounded-xs border border-neon-lime/20 bg-black/60 p-6 sm:p-8 backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 h-full w-1/3 bg-radial from-neon-lime/5 via-transparent to-transparent pointer-events-none" />
+
+            <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-neon-lime mb-2">
+              <Terminal className="h-4 w-4" aria-hidden="true" />
+              <span>BYTEPROWLER // TECH_DATABASE // ROOT_ACCESS</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white font-sans">
+              Tech Arsenal
+            </h1>
+
+            <p className="mt-2 max-w-3xl text-sm sm:text-base leading-relaxed text-gray-300 font-sans">
+              Comprehensive telemetry and architecture manifest for every language, framework, database, and pipeline tool integrated into the Byteprowler ecosystem.
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-4 pt-4 border-t border-white/10 font-mono text-xs uppercase tracking-wider text-gray-400">
+              <div>
+                <span className="text-gray-400">TOTAL NODES: </span>
+                <span className="font-bold text-white">{techStack.length}</span>
               </div>
-              <h1 id="arsenal-title" className="text-3xl font-black uppercase leading-tight text-white sm:text-5xl">
-                Full Tech Arsenal
-              </h1>
-              <p className="max-w-3xl text-sm leading-relaxed text-gray-300 sm:text-base">
-                Searchable registry of the systems, frameworks, and tools currently shaping Byteprowler builds.
-              </p>
+              <span className="text-white/20">|</span>
+              <div>
+                <span className="text-gray-400">CORE ARCHITECTURE: </span>
+                <span className="font-bold text-neon-lime">
+                  {techStack.filter((t) => t.status === "CORE").length} NODES
+                </span>
+              </div>
+              <span className="text-white/20">|</span>
+              <div>
+                <span className="text-gray-400">ACTIVE DEPLOYMENTS: </span>
+                <span className="font-bold text-neon-blue">
+                  {techStack.filter((t) => t.status === "ACTIVE").length} NODES
+                </span>
+              </div>
+              <span className="text-white/20">|</span>
+              <div>
+                <span className="text-gray-400">GROWTH VECTORS: </span>
+                <span className="font-bold text-neon-purple">
+                  {techStack.filter((t) => t.status === "LEARNING").length} NODES
+                </span>
+              </div>
             </div>
-          </div>
+          </header>
 
-          <div className="mb-8 border border-neon-blue/15 bg-black/55 p-4">
-            <label htmlFor="tech-search" className="mb-2 block font-mono text-[11px] font-black uppercase tracking-widest text-neon-blue">
-              QUERY_SYSTEMS
-            </label>
+          {/* Search and Filters Control Panel */}
+          <section aria-labelledby="arsenal-controls-title" className="mb-8 rounded-xs border border-white/10 bg-[#07080c] p-4 sm:p-6 space-y-5">
+            <h2 id="arsenal-controls-title" className="sr-only">
+              Technology Search and Category Filters
+            </h2>
+
+            {/* Search Input Bar */}
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neon-blue" aria-hidden="true" />
-              <input
-                id="tech-search"
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search technologies, categories, or status..."
-                className="min-h-11 w-full rounded-sm border border-white/10 bg-black/70 py-2 pl-10 pr-3 font-mono text-sm text-white outline-none transition placeholder:text-gray-500 focus:border-neon-lime focus:ring-2 focus:ring-neon-lime/30"
-              />
-            </div>
+              <label
+                htmlFor="tech-search-input"
+                className="mb-2 flex items-center justify-between font-mono text-xs font-bold uppercase tracking-wider text-neon-blue"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Terminal className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>prwlr@db:~$ query --search</span>
+                </span>
+                <span className="hidden sm:inline font-mono text-[11px] text-gray-400">
+                  PRESS <kbd className="rounded-2xs border border-white/20 bg-white/5 px-1.5 py-0.5 text-gray-300">/</kbd> TO FOCUS
+                </span>
+              </label>
 
-            <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Technology categories">
-              {techCategories.map((category) => {
-                const isActive = activeCategory === category.id;
-                return (
+              <div className="relative">
+                <Search
+                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-neon-blue"
+                  aria-hidden="true"
+                />
+                <input
+                  ref={searchInputRef}
+                  id="tech-search-input"
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Filter by technology name, category, capabilities, or keyword..."
+                  className="min-h-12 w-full rounded-xs border border-white/15 bg-black/80 py-2.5 pl-11 pr-10 font-mono text-sm text-white placeholder-gray-400 outline-none transition focus:border-neon-lime focus:ring-2 focus:ring-neon-lime/30"
+                />
+                {query && (
                   <button
-                    key={category.id}
                     type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => setActiveCategory(category.id)}
-                    className={`min-h-10 rounded-sm border px-3 py-2 font-mono text-[10.5px] font-black uppercase tracking-widest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian ${isActive ? "border-neon-lime bg-neon-lime text-black" : "border-white/10 bg-black/50 text-gray-300 hover:border-neon-blue/40 hover:text-neon-blue"}`}
+                    onClick={() => setQuery("")}
+                    aria-label="Clear search input"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-2xs p-1 text-gray-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime"
                   >
-                    {category.label}
+                    <X className="h-4 w-4" aria-hidden="true" />
                   </button>
-                );
-              })}
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="mb-4 flex items-center justify-between gap-4 font-mono text-xs uppercase tracking-widest text-gray-400" aria-live="polite">
-            <span>{filteredTech.length} NODES MATCHED</span>
-            <span className="text-neon-lime">STATUS: ONLINE</span>
-          </div>
+            {/* Category Filter Tabs */}
+            <div>
+              <div className="mb-2 flex items-center justify-between font-mono text-xs uppercase tracking-wider text-gray-400">
+                <span className="font-bold text-gray-300">CATEGORY_FILTERS</span>
+                <span className="text-[11px] text-gray-400">
+                  {filteredTech.length} OF {techStack.length} MODULES DISPLAYED
+                </span>
+              </div>
 
-          {filteredTech.length > 0 ? (
-            <motion.div layout className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <AnimatePresence mode="popLayout">
-                {filteredTech.map((tech) => {
-                  const nodeId = `NODE_${String(techStack.indexOf(tech) + 100).padStart(3, "0")}`;
+              <div
+                role="tablist"
+                aria-label="Technology category filter tabs"
+                className="flex flex-wrap gap-2"
+              >
+                {techCategories.map((category) => {
+                  const isActive = activeCategory === category.id;
+                  const count = categoryCounts[category.id] ?? 0;
+
                   return (
-                    <motion.button
+                    <button
+                      key={category.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setActiveCategory(category.id)}
+                      className={`inline-flex min-h-10 items-center gap-2 rounded-xs border px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian ${
+                        isActive
+                          ? "border-neon-lime bg-neon-lime text-black shadow-[0_0_12px_rgba(197,255,0,0.3)]"
+                          : "border-white/10 bg-black/60 text-gray-300 hover:border-neon-lime/40 hover:text-white"
+                      }`}
+                    >
+                      <span>{category.label}</span>
+                      <span
+                        className={`rounded-2xs px-1.5 py-0.5 text-[10px] font-black ${
+                          isActive ? "bg-black/20 text-black" : "bg-white/5 text-gray-400"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Secondary Status Filter Row */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-3 font-mono text-xs">
+              <div className="flex items-center gap-2">
+                <Filter className="h-3.5 w-3.5 text-gray-400" aria-hidden="true" />
+                <span className="uppercase text-gray-400">STATUS_FILTER:</span>
+                <div className="flex gap-1.5">
+                  {(["ALL", "CORE", "ACTIVE", "LEARNING"] as const).map((status) => {
+                    const isStatusActive = selectedStatus === status;
+                    return (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() => setSelectedStatus(status)}
+                        className={`rounded-2xs px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider transition ${
+                          isStatusActive
+                            ? "bg-white/20 text-white font-black"
+                            : "text-gray-400 hover:text-gray-200"
+                        }`}
+                      >
+                        {status}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {(query || activeCategory !== "ALL_SYSTEMS" || selectedStatus !== "ALL") && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="inline-flex items-center gap-1.5 text-neon-lime hover:underline text-xs uppercase font-bold"
+                >
+                  <RefreshCw className="h-3 w-3" aria-hidden="true" />
+                  <span>RESET_ALL_FILTERS</span>
+                </button>
+              )}
+            </div>
+          </section>
+
+          {/* Results Summary Bar */}
+          <div
+            className="mb-4 flex items-center justify-between gap-4 font-mono text-xs uppercase tracking-wider text-gray-400"
+            aria-live="polite"
+          >
+            <span>
+              SYSTEM_MATCHES:{" "}
+              <strong className="text-neon-lime font-bold">{filteredTech.length}</strong> NODES
+            </span>
+            <span className="hidden sm:inline text-gray-400">
+              CLICK CARD TO INSPECT SPECIFICATIONS
+            </span>
+          </div>
+
+          {/* Responsive Grid with Motion Animations */}
+          {filteredTech.length > 0 ? (
+            <motion.div
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredTech.map((tech, index) => {
+                  const nodeId = tech.nodeId || `NODE_${String(index + 1).padStart(3, "0")}`;
+                  return (
+                    <motion.div
                       layout
                       key={tech.name}
-                      type="button"
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
                       transition={{ duration: shouldReduceMotion ? 0.01 : 0.22 }}
-                      onClick={() => setSelectedTech(tech)}
-                      className="group min-h-56 rounded-sm border border-white/10 bg-[#0b0c10]/80 p-4 text-left transition duration-300 hover:-translate-y-1 hover:border-neon-lime/45 hover:bg-black hover:shadow-glow-lime/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian motion-reduce:transform-none"
-                      aria-label={`Open details for ${tech.name}`}
                     >
-                      <div className="flex items-center justify-between border-b border-white/10 pb-3 font-mono text-[10px] uppercase tracking-widest text-gray-400">
-                        <span className="flex items-center gap-2 text-neon-blue"><Cpu className="h-3.5 w-3.5" aria-hidden="true" />{categoryLabel(tech.category)}</span>
-                        <span>{nodeId}</span>
-                      </div>
-                      <div className="flex items-start justify-between gap-3 pt-5">
-                        <h2 className="text-xl font-black uppercase tracking-tight text-white transition group-hover:text-neon-lime">{tech.name}</h2>
-                        <span className={`rounded-sm border px-2 py-1 font-mono text-[10px] font-black tracking-widest ${statusClasses[tech.status]}`}>{tech.status}</span>
-                      </div>
-                      <p className="mt-3 min-h-12 text-sm leading-relaxed text-gray-400">{tech.description}</p>
-                      <div className="mt-5 flex items-end justify-between gap-4 font-mono text-[10px] uppercase tracking-widest text-gray-400">
-                        <span>EXPERIENCE: {experienceLabel(tech.experience)}</span>
-                        <span className="flex gap-1" aria-label={`${tech.experience ?? 0} out of 5 experience level`}>
-                          {Array.from({ length: 5 }, (_, index) => <span key={index} className={`h-2 w-3 rounded-xs ${index < (tech.experience ?? 0) ? "bg-neon-lime" : "bg-white/10"}`} aria-hidden="true" />)}
-                        </span>
-                      </div>
-                    </motion.button>
+                      <TechCard
+                        tech={tech}
+                        nodeId={nodeId}
+                        onClick={() => handleCardClick(tech, nodeId)}
+                      />
+                    </motion.div>
                   );
                 })}
               </AnimatePresence>
             </motion.div>
           ) : (
-            <div className="border border-white/10 bg-black/50 p-6 font-mono text-sm font-bold uppercase text-gray-300">
-              NO_SYSTEMS_MATCH_QUERY
+            <div className="rounded-xs border border-dashed border-white/15 bg-black/50 p-10 text-center font-mono space-y-3">
+              <p className="text-neon-lime text-base font-bold uppercase tracking-wider">
+                [SYSTEM_ALERT] NO_SYSTEMS_MATCH_QUERY
+              </p>
+              <p className="text-xs text-gray-400 max-w-md mx-auto">
+                No technological modules matched &quot;{query}&quot; within category &quot;{activeCategory}&quot;.
+              </p>
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="mt-4 inline-flex items-center gap-2 rounded-xs border border-neon-lime/40 bg-neon-lime px-4 py-2 font-mono text-xs font-black uppercase text-black hover:bg-[#bbf000]"
+              >
+                <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+                RESET_SYSTEM_QUERY
+              </button>
             </div>
           )}
-        </section>
+        </div>
       </Layout>
 
-      <AnimatePresence>
-        {selectedTech && (
-          <motion.div
-            className="fixed inset-0 z-70 flex items-end justify-center bg-black/75 p-4 backdrop-blur-sm sm:items-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onMouseDown={(event) => {
-              if (event.target === event.currentTarget) setSelectedTech(null);
-            }}
-          >
-            <motion.div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="tech-detail-title"
-              className="w-full max-w-xl rounded-sm border border-neon-lime/30 bg-[#080a0d] p-5 shadow-glow-lime/10 sm:p-7"
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
-            >
-              <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
-                <div>
-                  <p className="font-mono text-[11px] font-black uppercase tracking-widest text-neon-lime">NODE_DETAIL // {String(techStack.indexOf(selectedTech) + 100).padStart(3, "0")}</p>
-                  <h2 id="tech-detail-title" className="mt-2 text-2xl font-black uppercase text-white">{selectedTech.name}</h2>
-                </div>
-                <button
-                  ref={closeButtonRef}
-                  type="button"
-                  onClick={() => setSelectedTech(null)}
-                  aria-label="Close technology details"
-                  className="rounded-sm border border-white/10 p-2 text-gray-300 transition hover:border-neon-lime/50 hover:text-neon-lime focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime"
-                >
-                  <X className="h-5 w-5" aria-hidden="true" />
-                </button>
-              </div>
-              <div className="grid gap-4 py-5 sm:grid-cols-2">
-                <div><span className="font-mono text-[11px] uppercase tracking-widest text-gray-500">CATEGORY</span><p className="mt-1 font-mono text-sm font-bold text-neon-blue">{categoryLabel(selectedTech.category)}</p></div>
-                <div><span className="font-mono text-[11px] uppercase tracking-widest text-gray-500">STATUS </span><p className={`mt-1 inline-block rounded-sm border px-2 py-1 font-mono text-xs font-black ${statusClasses[selectedTech.status]}`}>{selectedTech.status}</p></div>
-                <div className="sm:col-span-2"><span className="font-mono text-[11px] uppercase tracking-widest text-gray-500">DESCRIPTION</span><p className="mt-1 text-sm leading-relaxed text-gray-200">{selectedTech.description ?? "No description available."}</p></div>
-                <div><span className="font-mono text-[11px] uppercase tracking-widest text-gray-500">PROJECTS_USED</span><p className="mt-1 flex items-center gap-2 font-mono text-sm font-bold text-white"><Database className="h-4 w-4 text-neon-lime" aria-hidden="true" />{selectedTech.projectsUsed ?? 0}</p></div>
-                <div><span className="font-mono text-[11px] uppercase tracking-widest text-gray-500">EXPERIENCE_LEVEL</span><p className="mt-1 font-mono text-sm font-bold text-white">{experienceLabel(selectedTech.experience)} / 5</p></div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Tech Detail Inspection Modal */}
+      <TechDetailModal
+        tech={selectedTech}
+        nodeId={selectedNodeId}
+        isOpen={Boolean(selectedTech)}
+        onClose={() => setSelectedTech(null)}
+      />
     </>
   );
 }

@@ -32,12 +32,12 @@ interface LastFmRecentTracksResponse {
   message?: string;
 }
 
-function pickImage(images: LastFmImage[] = []) {
+export function pickImage(images: LastFmImage[] = []) {
   const preferred = [...images].reverse().find((image) => image["#text"]);
   return preferred?.["#text"] || undefined;
 }
 
-function normalizeTrack(track: LastFmRecentTrack, index: number): LastFmTrack {
+export function normalizeTrack(track: LastFmRecentTrack, index = 0): LastFmTrack {
   const playedAt = track.date?.uts ? new Date(Number(track.date.uts) * 1000).toISOString() : undefined;
   const title = track.name || "Unknown Track";
   const artist = track.artist?.["#text"] || "Unknown Artist";

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Activity, Cpu, Menu, RefreshCw, Terminal, X } from "lucide-react";
