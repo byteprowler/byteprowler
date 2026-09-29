@@ -21,15 +21,17 @@ describe("AnimeFeed Component", () => {
   it("renders section header and sync button", () => {
     renderWithClient(<AnimeFeed />);
 
-    expect(screen.getByText(/Media Signal Stream/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /force refresh anilist activity cache/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /recent_activity/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /top_favorites/i })).toBeInTheDocument();
+    expect(screen.getByText("AnimeFeed")).toBeInTheDocument();
+    expect(screen.getByText(/Personal media cache: favorite anime entries detected/i)).toBeInTheDocument();
   });
 
-  it("renders activity feed items with badges", () => {
+  it("renders fallback anime cards with status badges", () => {
     renderWithClient(<AnimeFeed />);
 
-    expect(screen.getAllByRole("link").length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: "Attack on Titan Final Season" })
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("COMPLETED", { exact: true })).toHaveLength(4);
+    expect(screen.getAllByRole("link", { name: "ANILIST_LOG" })).toHaveLength(4);
   });
 });
