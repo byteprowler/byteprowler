@@ -193,7 +193,7 @@ export default function TechDetailModal({
                 </span>
                 <div className="mt-1 flex items-center gap-2 font-mono text-sm font-bold text-neon-lime">
                   <Shield className="h-4 w-4" aria-hidden="true" />
-                  <span>{tech.status} // OPERATIONAL</span>
+                  <span>{tech.status} {`//`} OPERATIONAL</span>
                 </div>
               </div>
 
