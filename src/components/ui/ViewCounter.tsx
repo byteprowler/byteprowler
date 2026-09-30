@@ -1,11 +1,51 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Eye } from "lucide-react";
 
+const VISITOR_ID_KEY = "byteprowler_anon_visitor_id";
+const VIEW_COOLDOWN_KEY = "byteprowler_view_cooldown_until";
+const VIEW_COOLDOWN_MS = 1000 * 60 * 60 * 6;
+
+function createVisitorId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `visitor_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function getAnonymousVisitorId() {
+  try {
+    const existingId = localStorage.getItem(VISITOR_ID_KEY);
+    if (existingId) return existingId;
+
+    const nextId = createVisitorId();
+    localStorage.setItem(VISITOR_ID_KEY, nextId);
+    return nextId;
+  } catch {
+    return "";
+  }
+}
+
+function isCooldownActive() {
+  try {
+    const cooldownUntil = Number(localStorage.getItem(VIEW_COOLDOWN_KEY) || 0);
+    return Number.isFinite(cooldownUntil) && cooldownUntil > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function setViewCooldown() {
+  try {
+    localStorage.setItem(VIEW_COOLDOWN_KEY, String(Date.now() + VIEW_COOLDOWN_MS));
+  } catch {
+    // localStorage can be unavailable in hardened browsers; server-side safeguards still apply.
+  }
+}
+
 /**
- * ViewCounter Component
- * Standard stats display that handles persistent tracking of sessions securely.
- * Automatically buffers multiple loads during React developments, increments precisely once
- * per visitor session using client-side sessionStorage, and aligns with the hacker prompt direction.
+ * ViewCounter displays the public portfolio count without storing personal data.
+ * It sends only an anonymous browser-generated visitor id and the current path.
  */
 export default function ViewCounter() {
   const [views, setViews] = useState<number | null>(null);
@@ -16,15 +56,19 @@ export default function ViewCounter() {
     if (typeof window === "undefined" || networkFired.current) return;
     networkFired.current = true;
 
-    // sessionStorage acts as a session boundary to protect database from duplicate tallies
-    const isSessionTallied = sessionStorage.getItem("byteprowler_sync_view_tallied");
-
     const syncCounter = async () => {
       try {
-        const method = isSessionTallied ? "GET" : "POST";
+        const visitorId = getAnonymousVisitorId();
+        const shouldIncrement = Boolean(visitorId) && !isCooldownActive();
         const response = await fetch("/api/view", {
-          method,
+          method: shouldIncrement ? "POST" : "GET",
           headers: { "Content-Type": "application/json" },
+          body: shouldIncrement
+            ? JSON.stringify({
+                visitorId,
+                pagePath: window.location.pathname || "/",
+              })
+            : undefined,
         });
 
         if (!response.ok) {
@@ -32,11 +76,11 @@ export default function ViewCounter() {
         }
 
         const data = await response.json();
-        
+
         if (typeof data.count === "number") {
           setViews(data.count);
-          if (!isSessionTallied) {
-            sessionStorage.setItem("byteprowler_sync_view_tallied", "true");
+          if (shouldIncrement) {
+            setViewCooldown();
           }
         } else {
           throw new Error("Stream integrity error: count missing from data object");
@@ -47,10 +91,9 @@ export default function ViewCounter() {
       }
     };
 
-    syncCounter();
+    void syncCounter();
   }, []);
 
-  // Format with leading zeros for that genuine early systems/terminal look
   const padViews = views !== null ? String(views).padStart(6, "0") : "------";
 
   return (

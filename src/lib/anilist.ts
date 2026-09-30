@@ -260,7 +260,9 @@ export function determineActivityKind(action: string, progress?: string): AniLis
 export function normalizeActivity(node: AniListActivityNode): AniListActivityItem | null {
   if (!node.id || !node.media) return null;
 
-  const title = node.media.title?.english || node.media.title?.romaji || "Unknown media";
+  const title = node.media.title?.english || node.media.title?.romaji;
+  if (!title) return null;
+
   const action = node.status || "updated";
   const progress = node.progress || undefined;
 
@@ -322,12 +324,14 @@ export const fetchUserFavourites = fetchFavoriteAnime;
 
 export async function fetchAniListActivity(
   username: string,
-  limit = 5
+  limit = 5,
+  requestLimit = Math.max(limit * 2, 10)
 ): Promise<AniListActivityItem[]> {
   const cleanUsername = username.trim();
   if (!cleanUsername) return [];
 
   const safeLimit = Math.min(Math.max(limit, 1), 10);
+  const safeRequestLimit = Math.min(Math.max(requestLimit, safeLimit), 20);
   const userData = await requestAniList<{ User?: { id?: number } }>(GET_USER_ID_QUERY, {
     username: cleanUsername,
   });
@@ -337,7 +341,7 @@ export async function fetchAniListActivity(
 
   const activityData = await requestAniList<{ Page?: { activities?: AniListActivityNode[] } }>(
     GET_USER_ACTIVITY_BY_ID_QUERY,
-    { userId, limit: safeLimit }
+    { userId, limit: safeRequestLimit }
   );
 
   return (activityData.Page?.activities || [])

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
-import { Headphones, Heart, MessageCircle, Radio, RefreshCw, ShieldAlert, Signal, Tv } from "lucide-react";
+import { Heart, MessageCircle, Radio, RefreshCw, ShieldAlert, Signal, Tv } from "lucide-react";
 import { fetchAniListActivity, type AniListActivityItem } from "../../lib/anilist";
 import type { LastFmTrack } from "../../lib/lastfm";
 import { siteSettings } from "../../lib/content/siteSettings";
@@ -10,14 +10,21 @@ import DiscordPresence from "./DiscordPresence";
 
 type SignalTab = "anilist" | "music" | "discord";
 
+const SIGNAL_ACTIVITY_LIMIT = 6;
+const ANILIST_ACTIVITY_REQUEST_LIMIT = 10;
+const ANILIST_ACTIVITY_STALE_TIME = 1000 * 60 * 45;
+const LASTFM_STALE_TIME = 1000 * 60;
+const LASTFM_BACKGROUND_REFRESH_INTERVAL = 1000 * 60 * 5;
+
 interface LastFmRecentResponse {
   configured: boolean;
   tracks: LastFmTrack[];
   message?: "METHOD_NOT_ALLOWED" | "LASTFM_CONFIG_MISSING" | "LASTFM_SIGNAL_OFFLINE";
 }
 
-async function fetchRecentTracks() {
-  const response = await fetch("/api/lastfm/recent");
+async function fetchRecentTracks(refreshNonce = 0) {
+  const query = refreshNonce ? `?refresh=${refreshNonce}` : "";
+  const response = await fetch(`/api/lastfm/recent${query}`, { cache: refreshNonce ? "no-store" : "default" });
   if (!response.ok) {
     throw new Error("LASTFM_API_ROUTE_OFFLINE");
   }
@@ -109,12 +116,14 @@ function AniListActivityPanel() {
   const hasUsername = !!username.trim();
   const { data, isLoading, isFetching, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["anilistActivity", username],
-    queryFn: () => fetchAniListActivity(username, 6),
+    queryFn: () => fetchAniListActivity(username, SIGNAL_ACTIVITY_LIMIT, ANILIST_ACTIVITY_REQUEST_LIMIT),
     enabled: hasUsername,
-    staleTime: 1000 * 60 * 10,
+    staleTime: ANILIST_ACTIVITY_STALE_TIME,
+    refetchInterval: ANILIST_ACTIVITY_STALE_TIME,
+    refetchIntervalInBackground: false,
   });
 
-  const activities = (data || []).slice(0, 6);
+  const activities = (data || []).slice(0, SIGNAL_ACTIVITY_LIMIT);
 
   const header = (
     <SignalPanelHeader
@@ -156,21 +165,23 @@ function AniListActivityPanel() {
 }
 
 function MusicLogPanel() {
-  const { data, isLoading, isFetching, error, refetch, dataUpdatedAt } = useQuery({
-    queryKey: ["lastfmRecentTracks"],
-    queryFn: fetchRecentTracks,
-    staleTime: 1000 * 60 * 2,
-
-    refetchInterval: 1000 * 60 * 2,
-
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const { data, isLoading, isFetching, error, dataUpdatedAt } = useQuery({
+    queryKey: ["lastfmRecentTracks", refreshNonce],
+    queryFn: () => fetchRecentTracks(refreshNonce),
+    staleTime: LASTFM_STALE_TIME,
+    refetchInterval: LASTFM_BACKGROUND_REFRESH_INTERVAL,
     refetchIntervalInBackground: false,
-
     refetchOnWindowFocus: true,
   });
 
-  const tracks = (data?.tracks || []).slice(0, 5);
+  const tracks = (data?.tracks || []).slice(0, SIGNAL_ACTIVITY_LIMIT);
   const nowPlaying = tracks.find((track) => track.nowPlaying);
-  const recentTracks = (nowPlaying ? tracks.filter((track) => !track.nowPlaying) : tracks).slice(0, nowPlaying ? 4 : 5);
+  const recentTracks = (nowPlaying ? tracks.filter((track) => !track.nowPlaying) : tracks).slice(
+    0,
+    nowPlaying ? SIGNAL_ACTIVITY_LIMIT - 1 : SIGNAL_ACTIVITY_LIMIT
+  );
+  const displayTracks = nowPlaying ? [nowPlaying, ...recentTracks] : recentTracks;
   const isUnconfigured = data?.configured === false || data?.message === "LASTFM_CONFIG_MISSING";
   const isOffline = !!error || data?.message === "LASTFM_SIGNAL_OFFLINE";
   const header = (
@@ -178,8 +189,10 @@ function MusicLogPanel() {
       signal="MUSIC_LOG"
       lastSyncedAt={dataUpdatedAt}
       isFetching={isFetching}
-      onRefresh={() => void refetch()}
-      disabled={isFetching}
+      onRefresh={() => {
+        setRefreshNonce(Date.now());
+      }}
+      disabled={false}
       ariaLabel="Refresh Last.fm music signal"
     />
   );
@@ -203,23 +216,13 @@ function MusicLogPanel() {
   return (
     <div className="flex flex-col gap-4">
       {header}
-      {nowPlaying && (
-        <div>
-          <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neon-green">
-            <Headphones className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>NOW_PLAYING_SIGNAL</span>
-          </div>
-          <TrackCard track={nowPlaying} />
-        </div>
-      )}
-
       <div>
         <div className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-neon-blue">
           <Radio className="h-3.5 w-3.5" aria-hidden="true" />
-          <span>RECENT_SIGNALS</span>
+          <span>{nowPlaying ? "NOW_PLAYING + RECENT_SIGNALS" : "RECENT_SIGNALS"}</span>
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {recentTracks.map((track) => (
+          {displayTracks.map((track) => (
             <TrackCard key={track.id} track={track} />
           ))}
         </div>
@@ -245,7 +248,7 @@ function SignalState({ label, copy, tone }: { label: string; copy: string; tone:
 function SignalSkeleton({ label }: { label: string }) {
   return (
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {Array.from({ length: 5 }).map((_, index) => (
+      {Array.from({ length: SIGNAL_ACTIVITY_LIMIT }).map((_, index) => (
         <div key={index} className="min-h-28 animate-pulse rounded-sm border border-white/10 bg-white/3" />
       ))}
       <span className="sr-only">{label}</span>

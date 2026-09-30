@@ -58,10 +58,12 @@ export function normalizeTrack(track: LastFmRecentTrack, index = 0): LastFmTrack
 
 export async function fetchRecentLastFmTracks({
   apiKey,
+  cacheBust,
   username,
   limit = 6,
 }: {
   apiKey: string;
+  cacheBust?: string;
   username: string;
   limit?: number;
 }) {
@@ -74,7 +76,13 @@ export async function fetchRecentLastFmTracks({
     limit: String(safeLimit),
   });
 
-  const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params.toString()}`);
+  if (cacheBust) {
+    params.set("_", cacheBust);
+  }
+
+  const response = await fetch(`https://ws.audioscrobbler.com/2.0/?${params.toString()}`, {
+    cache: cacheBust ? "no-store" : "default",
+  });
 
   if (!response.ok) {
     throw new Error(`Last.fm responded with HTTP ${response.status}`);
