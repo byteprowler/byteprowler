@@ -13,7 +13,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
   const shouldReduceMotion = useReducedMotion();
   const isHomePage = router.pathname === "/";
 
-  // Keep the first render identical on the server and client. The session
+  // Keep the first render identical on the server and client is. The session
   // preference is applied by the effect below after hydration.
   const [isBootComplete, setIsBootComplete] = useState(true);
 
