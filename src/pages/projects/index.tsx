@@ -58,8 +58,8 @@ export default function ProjectArchivePage() {
       <SEO
         title="Project Archive | Byteprowler"
         description="Full Byteprowler project archive covering featured builds, client work, learning projects, labs, and side experiments."
-        url="PASTE_CANONICAL_URL_HERE/projects"
-        image="/og-byteprowler.png"
+        url="/projects"
+        image="/og-byteprowler.jpg"
       />
 
       <Layout>
@@ -93,15 +93,14 @@ export default function ProjectArchivePage() {
               <Filter className="h-3.5 w-3.5" aria-hidden="true" />
               ARCHIVE_FILTERS
             </div>
-            <div role="tablist" aria-label="Project archive filters" className="flex flex-wrap gap-2">
+            <div role="group" aria-label="Project archive filters" className="flex flex-wrap gap-2">
               {filters.map((filter) => {
                 const isActive = activeFilter === filter;
                 return (
                   <button
                     key={filter}
                     type="button"
-                    role="tab"
-                    aria-selected={isActive}
+                    aria-pressed={isActive}
                     onClick={() => setActiveFilter(filter)}
                     className={`min-h-10 rounded-sm border px-3 py-2 font-mono text-[10.5px] font-black uppercase tracking-widest transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian ${
                       isActive

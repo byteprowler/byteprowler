@@ -58,9 +58,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 </div>
 
                 {/* Project Title */}
-                <h4 className="text-xl font-bold text-white tracking-tight leading-snug group-hover:text-neon-lime transition-all duration-300 uppercase font-sans">
+                <h3 className="text-xl font-bold text-white tracking-tight leading-snug group-hover:text-neon-lime transition-all duration-300 uppercase font-sans">
                     {project.title}
-                </h4>
+                </h3>
 
                 {/* Project Short Description */}
                 <p className="text-gray-200 text-sm leading-relaxed mt-2.5 font-sans">
@@ -122,6 +122,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                 {/* Core Case Study Router Action */}
                 <Link
                     href={`/projects/${project.slug}`}
+                    aria-label={`View ${project.title} case study`}
                     className="text-xs font-mono font-bold text-neon-lime hover:text-white flex items-center gap-1 group/btn transition-colors duration-200 cursor-pointer"
                 >
                     <span>VIEW CASE STUDY</span>

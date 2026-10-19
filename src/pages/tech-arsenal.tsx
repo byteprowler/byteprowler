@@ -110,8 +110,8 @@ export default function TechArsenalPage() {
       <SEO
         title="Tech Arsenal | Byteprowler Database"
         description="Search the complete Byteprowler technology database, including frontend core, frameworks, styling, backend systems, and development workflow."
-        url="PASTE_CANONICAL_URL_HERE/tech-arsenal"
-        image="/og-byteprowler.png"
+        url="/tech-arsenal"
+        image="/og-byteprowler.jpg"
       />
 
       <Layout>

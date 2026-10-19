@@ -43,7 +43,7 @@ const contactApiBaseUrl = process.env.NEXT_PUBLIC_CONTACT_API_URL;
 
 function getContactEndpoint() {
   if (!contactApiBaseUrl) {
-    return null;
+    return "/api/contact";
   }
 
   return `${contactApiBaseUrl.replace(/\/$/, "")}/api/contact/send/`;
@@ -103,6 +103,10 @@ export default function Contact() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
     if (!validateForm()) {
       setActiveConsoleLog("[SYS_ERR] Transmission validation failed check headers. Re-verify inputs.");
       return;
@@ -113,10 +117,6 @@ export default function Contact() {
 
     try {
       const contactEndpoint = getContactEndpoint();
-
-      if (!contactEndpoint) {
-        throw new Error("CONTACT_ENDPOINT_MISSING");
-      }
 
       // Future ProwlerLabs idea: build a private CRM/admin dashboard for leads and project inquiries.
       const response = await fetch(contactEndpoint, {
@@ -155,8 +155,8 @@ export default function Contact() {
       setIsSubmitting(false);
       const errorMessage = err instanceof Error ? err.message : "";
       setActiveConsoleLog(
-        errorMessage === "CONTACT_ENDPOINT_MISSING"
-          ? "[SYS_ERR] Contact endpoint missing. Configure NEXT_PUBLIC_CONTACT_API_URL on Vercel."
+        errorMessage === "DUPLICATE_SIGNAL: This message was already received recently."
+          ? "[SYS_WARN] Duplicate transmission detected. Message already received recently."
           : "[SYS_ERR] Message could not be sent. Please try again later."
       );
     }

@@ -9,8 +9,8 @@ export default function Custom404() {
       <SEO
         title="ERROR 404: ROUTE_NOT_FOUND | Byteprowler"
         description="The requested path does not exist in the Byteprowler system."
-        image="/og-byteprowler.png"
-        url="PASTE_CANONICAL_URL_HERE/404"
+        image="/og-byteprowler.jpg"
+        noindex
       />
       <main className="min-h-screen bg-obsidian px-4 py-20 text-gray-100 grid place-items-center">
         <section className="w-full max-w-2xl border border-neon-lime/20 bg-black/75 rounded-sm p-6 font-mono shadow-glow-lime/5">

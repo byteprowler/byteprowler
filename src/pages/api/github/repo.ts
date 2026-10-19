@@ -40,6 +40,10 @@ export default async function handler(
     }
 
     const payload = await response.json();
+    if (payload.private !== false) {
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(200).json({ ok: false, message: "GITHUB_REPO_UNAVAILABLE" });
+    }
     res.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=86400");
     return res.status(200).json({
       ok: true,

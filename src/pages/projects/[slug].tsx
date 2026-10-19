@@ -7,6 +7,7 @@ import { getProjectBySlug, projects } from "../../lib/projects";
 import { fetchGithubRepoMetadata } from "../../lib/github";
 import Layout from "../../components/layout/Layout";
 import SEO from "../../components/seo/SEO";
+import { canonicalUrl, absoluteImage } from "../../lib/site";
 
 interface ProjectDetailProps {
   slug?: string;
@@ -69,16 +70,6 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
     );
   }
 
-  const handleBackNavigation = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (onBack) {
-      onBack();
-    } else if (typeof window !== "undefined") {
-      // Direct navigation
-      window.location.href = "/#projects";
-    }
-  };
-
   const statusLabels = {
     COMPLETE: "PRODUCTION_STEADY",
     PROTOTYPE: "SANDBOX_VERIFIED",
@@ -86,8 +77,8 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
   };
   const seoDescription =
     project.description || project.longDescription || "A Byteprowler project case study.";
-  const seoImage = project.ogImage || project.coverImage || project.image || "/og-byteprowler.png";
-  const seoUrl = `PASTE_CANONICAL_URL_HERE/projects/${project.slug}`;
+  const seoImage = project.ogImage || "/og-byteprowler.jpg";
+  const seoUrl = `/projects/${project.slug}`;
 
   return (
     <>
@@ -97,6 +88,14 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
         image={seoImage}
         url={seoUrl}
         type="article"
+        structuredData={{ "@context": "https://schema.org", "@graph": [
+          { "@type": "CreativeWork", name: project.title, description: seoDescription, url: canonicalUrl(seoUrl), image: absoluteImage(seoImage) },
+          { "@type": "BreadcrumbList", itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: canonicalUrl("/") },
+            { "@type": "ListItem", position: 2, name: "Projects", item: canonicalUrl("/projects") },
+            { "@type": "ListItem", position: 3, name: project.title, item: canonicalUrl(seoUrl) },
+          ] },
+        ] }}
       />
       <Layout>
         <div className="py-6 flex flex-col gap-8 select-none">
@@ -104,12 +103,11 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
         {/* Dynamic Navigation back bar */}
         <div className="flex items-center justify-between border-b border-white/5 pb-4 select-none">
           <Link
-            href="/"
-            onClick={handleBackNavigation}
+            href="/projects"
             className="flex items-center gap-2 font-mono text-xs text-neon-lime font-bold hover:text-white transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>BACK_TO_HOME_GRID</span>
+            <span>BACK_TO_PROJECT_ARCHIVE</span>
           </Link>
           <div className="text-[11px] text-gray-300 font-mono tracking-widest uppercase">
             {"// SYS_RECOVERY_NODE_STUDY"}
@@ -126,9 +124,9 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
               <div className="text-[11px] font-mono text-neon-blue font-bold tracking-widest bg-neon-blue/10 border border-neon-blue/20 px-2.5 py-0.5 rounded-sm w-fit uppercase">
                 [{project.type}]
               </div>
-              <h2 className="text-3xl sm:text-5xl font-black text-white leading-none tracking-tight uppercase font-sans">
+              <h1 className="text-3xl sm:text-5xl font-black text-white leading-none tracking-tight uppercase font-sans">
                 {project.title}
-              </h2>
+              </h1>
               <p className="text-gray-300 text-base leading-relaxed mt-2 font-sans border-l-2 border-neon-lime/30 pl-4">
                 {project.description}
               </p>
@@ -361,8 +359,8 @@ export const getStaticPaths: GetStaticPaths = () => ({
   fallback: false,
 });
 
-export const getStaticProps: GetStaticProps<ProjectDetailProps> = ({ params }) => ({
-  props: {
-    slug: typeof params?.slug === "string" ? params.slug : undefined,
-  },
-});
+export const getStaticProps: GetStaticProps<ProjectDetailProps> = ({ params }) => {
+  const slug = typeof params?.slug === "string" ? params.slug : "";
+  if (!getProjectBySlug(slug)) return { notFound: true };
+  return { props: { slug } };
+};

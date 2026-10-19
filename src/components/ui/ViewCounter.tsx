@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { Eye } from "lucide-react";
 
 const VISITOR_ID_KEY = "byteprowler_anon_visitor_id";
@@ -16,10 +17,12 @@ function createVisitorId() {
 function getAnonymousVisitorId() {
   try {
     const existingId = localStorage.getItem(VISITOR_ID_KEY);
-    if (existingId) return existingId;
+    const expires = Number(localStorage.getItem(`${VISITOR_ID_KEY}_expires`) || 0);
+    if (existingId && expires > Date.now()) return existingId;
 
     const nextId = createVisitorId();
     localStorage.setItem(VISITOR_ID_KEY, nextId);
+    localStorage.setItem(`${VISITOR_ID_KEY}_expires`, String(Date.now() + VIEW_COOLDOWN_MS));
     return nextId;
   } catch {
     return "";
@@ -50,23 +53,24 @@ function setViewCooldown() {
 export default function ViewCounter() {
   const [views, setViews] = useState<number | null>(null);
   const [hasError, setHasError] = useState(false);
-  const networkFired = useRef(false);
+  const { pathname } = useRouter();
 
   useEffect(() => {
-    if (typeof window === "undefined" || networkFired.current) return;
-    networkFired.current = true;
+    if (typeof window === "undefined") return;
+    let active = true;
 
     const syncCounter = async () => {
       try {
+        const wasCoolingDown = isCooldownActive();
         const visitorId = getAnonymousVisitorId();
-        const shouldIncrement = Boolean(visitorId) && !isCooldownActive();
+        const shouldIncrement = pathname === "/" && Boolean(visitorId) && !wasCoolingDown;
         const response = await fetch("/api/view", {
           method: shouldIncrement ? "POST" : "GET",
           headers: { "Content-Type": "application/json" },
           body: shouldIncrement
             ? JSON.stringify({
                 visitorId,
-                pagePath: window.location.pathname || "/",
+                pagePath: "/",
               })
             : undefined,
         });
@@ -77,22 +81,24 @@ export default function ViewCounter() {
 
         const data = await response.json();
 
-        if (typeof data.count === "number") {
-          setViews(data.count);
-          if (shouldIncrement) {
+        if (typeof data.count === "number" && Number.isFinite(data.count)) {
+          if (active) { setViews(data.count); setHasError(false); }
+          if (shouldIncrement && (data.counted || data.cooldownActive)) {
             setViewCooldown();
           }
         } else {
           throw new Error("Stream integrity error: count missing from data object");
         }
       } catch (error) {
+        try { localStorage.removeItem(VIEW_COOLDOWN_KEY); } catch { /* Storage is optional. */ }
         console.error("ViewCounter synchronization failed:", error);
-        setHasError(true);
+        if (active) setHasError(true);
       }
     };
 
     void syncCounter();
-  }, []);
+    return () => { active = false; };
+  }, [pathname]);
 
   const padViews = views !== null ? String(views).padStart(6, "0") : "------";
 

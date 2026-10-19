@@ -48,6 +48,30 @@ export function getHomepageProjects(limit = 6): Project[] {
 
 export const projects: Project[] = [
   {
+    slug: "prowlerpos",
+    title: "ProwlerPOS",
+    description: "A restaurant POS interface connecting sales, waiter ordering, kitchen operations, and business reporting through a unified workflow.",
+    longDescription: "ProwlerPOS is a restaurant operations platform concept designed to connect front-of-house sales, tableside ordering, kitchen workflows, and back-office reporting in one system. The interface brings together a fast POS checkout experience, waiter ordering from phones or tablets, real-time kitchen tickets, payment handling, customer history, discounts, inventory alerts, staff performance metrics, and sales reporting. The project focuses on reducing the friction between taking an order and getting it prepared by keeping the POS, waiter workflow, and kitchen display synchronized.",
+    stack: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    type: "Restaurant POS Platform",
+    status: "PROTOTYPE",
+    role: "Frontend Developer",
+    year: "2026",
+    category: "lab",
+    isFeatured: false,
+    showOnHome: false,
+    repoVisibility: "public",
+    liveUrl: "https://verbose-phi.vercel.app/",
+    highlights: [
+      "Designed a unified POS experience connecting front-of-house, waiter, kitchen, and reporting workflows.",
+      "Structured the waiter-to-POS-to-kitchen workflow around real-time order synchronization.",
+      "Designed high-speed checkout flows supporting items, categories, discounts, taxes, customer history, and split payments.",
+      "Designed a kitchen display workflow with New, Preparing, and Ready order states for operational clarity.",
+      "Presented sales tracking, inventory alerts, staff performance, and end-of-day reporting in a centralized dashboard.",
+      "Built the product experience around modular POS, Waiter App, Kitchen Display System, and reporting workflows.",
+    ],
+  },
+  {
     slug: "byteprowler-portfolio",
     title: "Byteprowler Portfolio",
     description: "Portfolio revamp showing the evolution from an initial personal site into the current Byteprowler hacker/terminal interface.",

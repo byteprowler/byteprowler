@@ -15,7 +15,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
 
   // Keep the first render identical on the server and client. The session
   // preference is applied by the effect below after hydration.
-  const [isBootComplete, setIsBootComplete] = useState(!isHomePage);
+  const [isBootComplete, setIsBootComplete] = useState(true);
 
   const [queryClient] = useState(
     () =>
@@ -39,9 +39,7 @@ export default function App({ Component, pageProps, router }: AppProps) {
       }
 
       try {
-        if (window.sessionStorage.getItem(BOOT_SESSION_KEY) === "true") {
-          setIsBootComplete(true);
-        }
+        setIsBootComplete(window.sessionStorage.getItem(BOOT_SESSION_KEY) === "true");
       } catch {
         setIsBootComplete(true);
       }
@@ -67,13 +65,14 @@ export default function App({ Component, pageProps, router }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <CustomCursor />
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {isHomePage && !isBootComplete ? (
           <BootSequence key="boot-sequence-overlay" onComplete={handleBootComplete} />
-        ) : (
+        ) : null}
           <motion.div
             key="app-main-content"
-            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            inert={isHomePage && !isBootComplete}
+            initial={false}
             animate={{ opacity: 1 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.35, ease: "easeOut" }}
             className="min-h-screen bg-obsidian text-gray-100 selection:bg-neon-lime selection:text-black font-sans relative antialiased overflow-x-hidden"
@@ -86,7 +85,6 @@ export default function App({ Component, pageProps, router }: AppProps) {
               <Component {...pageProps} />
             </div>
           </motion.div>
-        )}
       </AnimatePresence>
     </QueryClientProvider>
   );

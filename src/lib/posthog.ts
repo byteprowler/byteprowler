@@ -29,6 +29,7 @@ function getPostHogConfig() {
 }
 
 function ensurePostHog() {
+  if (process.env.NODE_ENV !== "production") return;
   if (typeof window === "undefined" || isPostHogBooted) return;
 
   const { key, host } = getPostHogConfig();
@@ -61,6 +62,7 @@ function ensurePostHog() {
 // PostHog is used for anonymous resume interaction events only.
 // Do not call posthog.identify or send contact form body, names, emails, or message content.
 export function captureResumeEvent(event: ResumeEventName, properties: ResumeEventProperties = {}) {
+  if (process.env.NODE_ENV !== "production") return;
   if (typeof window === "undefined") return;
 
   try {
