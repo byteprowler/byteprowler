@@ -18,8 +18,8 @@ export default function Home() {
   return (
     <>
       <SEO
-        title="ByteProwler | Frontend Developer Portfolio"
-        description="Byteprowler is a hacker-inspired developer portfolio showcasing frontend projects, certifications, build logs, and web interface work."
+        title={`${profile.realName} (ByteProwler) | ${profile.role}`}
+        description={`${profile.realName}, also known as ByteProwler, builds clean, responsive web interfaces with React, Next.js, TypeScript, and Tailwind CSS. Available for work and collaboration.`}
         url="/"
         structuredData={{ "@context": "https://schema.org", "@graph": [
           { "@type": "Person", "@id": `${SITE_URL}/#person`, name: profile.realName, alternateName: "ByteProwler", jobTitle: profile.role, url: SITE_URL, sameAs: [siteSettings.githubUrl, siteSettings.linkedinUrl] },
