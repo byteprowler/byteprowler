@@ -16,8 +16,8 @@ describe("SEO head", () => {
     for (const field of ["card", "title", "description", "image"]) expect(doc.querySelector(`meta[name="twitter:${field}"]`)).not.toBeNull();
   });
   it("supports project-specific images and canonical URLs", () => {
-    const html = renderToStaticMarkup(<SEO title="ManlagoPOS" description="Restaurant POS interface" url="/projects/manlagopos" image="/og-byteprowler.jpg" />);
-    expect(html).toContain(`${SITE_URL}/projects/manlagopos`);
+    const html = renderToStaticMarkup(<SEO title="ProwlerPOS" description="Restaurant POS interface" url="/projects/prowlerpos" image="/og-byteprowler.jpg" />);
+    expect(html).toContain(`${SITE_URL}/projects/prowlerpos`);
     expect(html).toContain(`${SITE_URL}/og-byteprowler.jpg`);
   });
   it("noindexes error pages", () => {

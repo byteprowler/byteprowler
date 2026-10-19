@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { existsSync } from "node:fs";
 import { canonicalUrl, absoluteImage, safeJsonLd, SITE_URL } from "../../lib/site";
 import { sitemapXml, robotsText, publicRoutes } from "../../lib/crawl";
-import { getProjectBySlug, getHomepageProjects } from "../../lib/projects";
+import { getProjectBySlug, getHomepageProjects, projects } from "../../lib/projects";
 
 describe("production discovery", () => {
   it("normalizes canonicals without query strings, preview origins or trailing slashes", () => {
@@ -12,19 +12,22 @@ describe("production discovery", () => {
     expect(existsSync("public/og-byteprowler.jpg")).toBe(true);
     expect(absoluteImage()).toBe(`${SITE_URL}/og-byteprowler.jpg`);
   });
-  it("adds ManlagoPOS with honest prototype data without extending the homepage", () => {
-    const project = getProjectBySlug("manlagopos");
-    expect(project?.title).toBe("ManlagoPOS");
+  it("adds ProwlerPOS with honest prototype data without extending the homepage", () => {
+    const project = getProjectBySlug("prowlerpos");
+    expect(project?.title).toBe("ProwlerPOS");
     expect(project?.status).toBe("PROTOTYPE");
     expect(project?.highlights).toHaveLength(6);
     expect(getHomepageProjects()).toHaveLength(6);
-    expect(getHomepageProjects().some(p => p.slug === "manlagopos")).toBe(false);
+    expect(getHomepageProjects().some(p => p.slug === "prowlerpos")).toBe(false);
   });
   it("produces parseable sitemap XML for real public routes only", () => {
     const doc = new DOMParser().parseFromString(sitemapXml(), "application/xml");
     expect(doc.querySelector("parsererror")).toBeNull();
     const locations = [...doc.querySelectorAll("loc")].map(n => n.textContent);
-    expect(locations).toContain(`${SITE_URL}/projects/manlagopos`);
+    expect(locations).toContain(`${SITE_URL}/projects/prowlerpos`);
+    for (const project of projects) {
+      expect(locations).toContain(canonicalUrl(`/projects/${project.slug}`));
+    }
     expect(locations).toHaveLength(publicRoutes.length);
     expect(locations.some(url => url?.includes("/api/"))).toBe(false);
   });

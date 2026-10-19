@@ -61,7 +61,7 @@ export const projects: Project[] = [
     isFeatured: false,
     showOnHome: false,
     repoVisibility: "public",
-    liveUrl: "https://verbose-phi.vercel.app/",
+    liveUrl: "https://prowler-pos.vercel.app/",
     highlights: [
       "Designed a unified POS experience connecting front-of-house, waiter, kitchen, and reporting workflows.",
       "Structured the waiter-to-POS-to-kitchen workflow around real-time order synchronization.",
