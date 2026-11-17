@@ -6,7 +6,7 @@ import AnimeCard from "../ui/AnimeCard";
 import { siteSettings } from "../../lib/content/siteSettings";
 
 export default function AnimeFeed() {
-  const username = siteSettings.anilistUsername || process.env.NEXT_PUBLIC_ANILIST_USERNAME || "";
+  const username = siteSettings.anilistUsername || process.env.ANILIST_USERNAME || "";
   const hasUsername = !!username.trim();
 
   const { data, isLoading, error } = useQuery({

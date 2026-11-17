@@ -276,7 +276,7 @@ export async function processContactSubmission(
   const mailTransport = options.mailTransport ?? createConfiguredMailTransport();
   const senderEmail = options.senderEmail || process.env.RESEND_FROM_EMAIL || process.env.SMTP_USER || "";
   const ownerEmail = options.ownerEmail || process.env.CONTACT_TO_EMAIL || process.env.RESEND_TO_EMAIL || process.env.SMTP_TO || process.env.SMTP_USER || "";
-  const portfolioUrl = options.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || "https://byteprowler.vercel.app";
+  const portfolioUrl = options.portfolioUrl || process.env.SITE_URL || "https://byteprowler.vercel.app";
 
   if (!mailTransport || !senderEmail || !ownerEmail) {
     throw new Error("CONTACT_DELIVERY_UNCONFIGURED");

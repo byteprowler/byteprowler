@@ -30,6 +30,14 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Configure pnpm global executables
+        shell: bash
+        run: |
+          GLOBAL_BIN_DIR="$RUNNER_TEMP/pnpm-global/bin"
+          mkdir -p "$GLOBAL_BIN_DIR"
+          pnpm config set global-bin-dir "$GLOBAL_BIN_DIR"
+          echo "$GLOBAL_BIN_DIR" >> "$GITHUB_PATH"
+
       - name: Install Vercel CLI
         run: pnpm add -g vercel@latest
         env:

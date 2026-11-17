@@ -112,7 +112,7 @@ function AniListActivityCard({ activity }: { activity: AniListActivityItem }) {
 }
 
 function AniListActivityPanel() {
-  const username = siteSettings.anilistUsername || process.env.NEXT_PUBLIC_ANILIST_USERNAME || "";
+  const username = siteSettings.anilistUsername || process.env.ANILIST_USERNAME || "";
   const hasUsername = !!username.trim();
   const { data, isLoading, isFetching, error, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["anilistActivity", username],

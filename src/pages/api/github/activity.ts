@@ -22,7 +22,7 @@ export default async function handler(
 
 
     const username =
-        process.env.NEXT_PUBLIC_GITHUB_USERNAME;
+        process.env.GITHUB_USERNAME;
 
 
 
