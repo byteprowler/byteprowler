@@ -105,7 +105,7 @@ export default function DeveloperTelemetry() {
         />
         <MetricRow
           icon={<Code2 className="h-3.5 w-3.5 shrink-0 text-neon-blue" aria-hidden="true" />}
-          label="PRIMARY_LANG"
+          label="TOP GITHUB LANGUAGES"
           value={telemetry?.primaryLanguages?.join(", ") || "--"}
         />
       </dl>

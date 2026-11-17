@@ -153,7 +153,6 @@ export const projects: Project[] = [
     category: "client",
     isFeatured: true,
     showOnHome: true,
-    githubUrl: "https://github.com/byteprowler/quickgas-portal",
     repoVisibility: "private",
     highlights: [
       "Reduced render loop overhead during real-time map canvas route alterations by 42%.",
@@ -388,10 +387,6 @@ export const projects: Project[] = [
     category: "client",
     isFeatured: true,
     showOnHome: true,
-    githubOwner: "byteprowler",
-    githubRepo: "https://github.com/byteprowler/jlpowertools",
-    useGithubMetadata: true,
-    preferGithubDescription: true,
     liveUrl: "https://jlpowertools.biz",
     repoVisibility: "private",
     highlights: [

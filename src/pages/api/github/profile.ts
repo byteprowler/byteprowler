@@ -7,6 +7,7 @@ interface GithubUserPayload {
 }
 
 interface GithubRepoPayload {
+  private?: boolean;
   name?: string;
   html_url?: string;
   stargazers_count?: number;
@@ -22,10 +23,6 @@ function getHeaders(): HeadersInit {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
   };
-
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-  }
 
   return headers;
 }
@@ -61,10 +58,10 @@ export default async function handler(
   }
 
   try {
-    const headers = getHeaders();
+    const options = { headers: getHeaders(), signal: AbortSignal.timeout(5000), redirect: "error" as const };
     const [userResponse, reposResponse] = await Promise.all([
-      fetch(`https://api.github.com/users/${encodeURIComponent(username)}`, { headers }),
-      fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?type=owner&sort=pushed&direction=desc&per_page=100`, { headers }),
+      fetch(`https://api.github.com/users/${encodeURIComponent(username)}`, options),
+      fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?type=owner&sort=pushed&direction=desc&per_page=100`, options),
     ]);
 
     if (!userResponse.ok || !reposResponse.ok) {
@@ -73,7 +70,7 @@ export default async function handler(
     }
 
     const user = (await userResponse.json()) as GithubUserPayload;
-    const repos = ((await reposResponse.json()) as GithubRepoPayload[]).filter((repo) => !repo.fork);
+    const repos = ((await reposResponse.json()) as GithubRepoPayload[]).filter((repo) => repo?.private === false && !repo.fork);
     const recentlyUpdatedRepo = repos.find((repo) => repo.name && repo.html_url);
 
     res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=7200");
@@ -96,8 +93,7 @@ export default async function handler(
           : undefined,
       },
     });
-  } catch (error) {
-    console.error("GITHUB_SIGNAL_OFFLINE", error instanceof Error ? error.message : error);
+  } catch {
     res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
     return res.status(200).json({ configured: true, ok: false, message: "GITHUB_SIGNAL_OFFLINE" });
   }

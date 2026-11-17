@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     );
     return res.status(200).json({ configured: true, tracks: tracks.slice(0, 6) });
   } catch (error) {
-    console.error("LASTFM_SIGNAL_OFFLINE", error instanceof Error ? error.message : error);
+    console.error("LASTFM_SIGNAL_OFFLINE");
     res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
     return res.status(200).json({
       configured: true,

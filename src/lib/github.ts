@@ -81,11 +81,13 @@ export async function fetchGithubActivity(
 
 
   const response = await fetch(
-    `https://api.github.com/users/${username}/events/public`,
+    `https://api.github.com/users/${encodeURIComponent(username)}/events/public`,
     {
       headers: {
         Accept: "application/vnd.github+json",
       },
+      signal: AbortSignal.timeout(5000),
+      redirect: "error",
       next: {
         revalidate: 120,
       }

@@ -1,3 +1,4 @@
+import { getTechProjectCount } from "../../lib/techUsage";
 import React, { useEffect, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
@@ -103,8 +104,7 @@ export default function TechDetailModal({
 
   const statusMeta = statusBadges[tech.status];
   const categoryCode = normalizeCategory(tech.category);
-  const experienceYears = tech.experience ?? 1;
-  const projectsCount = tech.projectsUsed ?? 0;
+  const projectsCount = getTechProjectCount(tech.name);
 
   return (
     <AnimatePresence>
@@ -197,39 +197,17 @@ export default function TechDetailModal({
                 </div>
               </div>
 
-              {/* Experience Level */}
-              <div className="rounded-xs border border-white/10 bg-black/50 p-3 sm:p-4">
-                <span className="block font-mono text-[10.5px] uppercase tracking-wider text-gray-400">
-                  EXPERIENCE_LEVEL
-                </span>
-                <div className="mt-1 flex items-center justify-between gap-2">
-                  <span className="font-mono text-sm font-bold text-white">
-                    {experienceYears === 1 ? "1 YEAR" : `${experienceYears} YEARS`} ({experienceYears}/5)
+              {projectsCount > 0 && (
+                <div className="rounded-xs border border-white/10 bg-black/50 p-3 sm:p-4">
+                  <span className="block font-mono text-[10.5px] uppercase tracking-wider text-gray-400">
+                    PORTFOLIO_PROJECTS
                   </span>
-                  <div className="flex items-center gap-1" aria-label={`Level ${experienceYears} of 5`}>
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <span
-                        key={i}
-                        className={`h-2 w-3 rounded-2xs ${
-                          i < experienceYears ? "bg-neon-lime shadow-[0_0_6px_#c5ff00]" : "bg-white/10"
-                        }`}
-                        aria-hidden="true"
-                      />
-                    ))}
+                  <div className="mt-1 flex items-center gap-2 font-mono text-sm font-bold text-white">
+                    <Database className="h-4 w-4 text-neon-lime" aria-hidden="true" />
+                    <span>{projectsCount}</span>
                   </div>
                 </div>
-              </div>
-
-              {/* Projects Used */}
-              <div className="rounded-xs border border-white/10 bg-black/50 p-3 sm:p-4">
-                <span className="block font-mono text-[10.5px] uppercase tracking-wider text-gray-400">
-                  PROJECTS_DEPLOYED
-                </span>
-                <div className="mt-1 flex items-center gap-2 font-mono text-sm font-bold text-white">
-                  <Database className="h-4 w-4 text-neon-lime" aria-hidden="true" />
-                  <span>{projectsCount} Repositories & Systems</span>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Description Section */}

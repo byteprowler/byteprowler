@@ -1,8 +1,6 @@
-import * as matchers from "@testing-library/jest-dom/matchers";
+import "@testing-library/jest-dom/vitest";
 import React from "react";
-import { expect, vi } from "vitest";
-
-expect.extend(matchers);
+import { vi } from "vitest";
 
 // Universal mock for next/image in unit/component test environment
 vi.mock("next/image", () => ({

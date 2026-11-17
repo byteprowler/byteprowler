@@ -51,6 +51,13 @@ function normalizeMessage(value: unknown) {
 }
 
 export function validateContactPayload(payload: ContactPayload): CleanContactPayload {
+  if (!payload || typeof payload.name !== "string" || typeof payload.email !== "string" ||
+    typeof payload.subject !== "string" || typeof payload.message !== "string" ||
+    payload.name.length > 120 || payload.email.length > 254 ||
+    payload.subject.length > 180 || payload.message.length > 4000 ||
+    /[\r\n]/.test(payload.email) || /[\r\n]/.test(payload.subject)) {
+    throw new ContactValidationError("INTEGRITY_ERR: Invalid contact fields.");
+  }
   const cleanName = stripTags(payload.name).slice(0, 120);
   const cleanEmail = stripTags(payload.email).slice(0, 254).toLowerCase();
   const cleanSubject = stripTags(payload.subject).slice(0, 180);
@@ -60,7 +67,7 @@ export function validateContactPayload(payload: ContactPayload): CleanContactPay
     throw new ContactValidationError("INTEGRITY_ERR: Missing mandatory transmission signature attributes.");
   }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+  if (!/^[A-Za-z0-9.!#$%&'*+/=?^_\x60{|}~-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/.test(cleanEmail) || cleanEmail !== payload.email.trim().toLowerCase()) {
     throw new ContactValidationError("DECRYPT_ERR: Invalid target email protocol formatting.");
   }
 
@@ -272,12 +279,7 @@ export async function processContactSubmission(
   const portfolioUrl = options.portfolioUrl || process.env.NEXT_PUBLIC_SITE_URL || "https://byteprowler.vercel.app";
 
   if (!mailTransport || !senderEmail || !ownerEmail) {
-    logContactSandbox(payload);
-    return {
-      success: true,
-      acknowledgementSent: false,
-      message: "Transmission Secure. Message queued successfully in central grid buffers.",
-    };
+    throw new Error("CONTACT_DELIVERY_UNCONFIGURED");
   }
 
   const ownerMail = buildOwnerNotificationEmail(payload, senderEmail, ownerEmail);
@@ -290,9 +292,9 @@ export async function processContactSubmission(
     const acknowledgementMail = buildAcknowledgementEmail(payload, senderEmail, portfolioUrl);
     await mailTransport.send(acknowledgementMail);
     acknowledgementSent = true;
-  } catch (error) {
+  } catch {
     acknowledgementFailed = true;
-    console.error("[CONTACT_ACKNOWLEDGEMENT_ERROR]", error instanceof Error ? error.message : error);
+    console.error("[CONTACT_ACKNOWLEDGEMENT_ERROR]");
   }
 
   return {
@@ -301,18 +303,4 @@ export async function processContactSubmission(
     acknowledgementSent,
     message: "Transmission Secure. Message dispatched successfully.",
   };
-}
-
-function logContactSandbox(payload: CleanContactPayload) {
-  console.log(`
-======================================================================
-[SANDBOX TELEMETRY LOG] TRANSMISSION SECURE: MESSAGE DISPATCH MOCKED
-----------------------------------------------------------------------
-Timestamp: ${payload.submittedAt}
-Sender:    ${payload.name}
-Email:     ${payload.email}
-Subject:   ${payload.subject}
-Message:   ${payload.message}
-======================================================================
-  `);
 }

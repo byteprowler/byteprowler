@@ -30,7 +30,7 @@ export default async function handler(
       return res.status(error.statusCode).json({ success: false, message: error.message });
     }
 
-    console.error("[CONTACT_API_ERROR]", error instanceof Error ? error.message : error);
+    console.error("[CONTACT_API_ERROR]");
     return res.status(500).json({
       success: false,
       message: "CONTACT_TRANSMISSION_FAILED",

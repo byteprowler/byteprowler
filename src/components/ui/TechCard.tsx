@@ -1,3 +1,4 @@
+import { getTechProjectCount } from "../../lib/techUsage";
 import React from "react";
 import { Cpu, Database, Sparkles, Terminal } from "lucide-react";
 import { TechItem, normalizeCategory } from "../../lib/content/techStack";
@@ -28,8 +29,7 @@ const statusStyles: Record<TechItem["status"], { badge: string; dot: string; glo
 
 export default function TechCard({ tech, nodeId, onClick }: TechCardProps) {
   const currentStatus = statusStyles[tech.status];
-  const experienceYears = tech.experience ?? 1;
-  const projectsCount = tech.projectsUsed ?? 0;
+  const projectsCount = getTechProjectCount(tech.name);
   const categoryCode = normalizeCategory(tech.category);
 
   return (
@@ -74,38 +74,12 @@ export default function TechCard({ tech, nodeId, onClick }: TechCardProps) {
         </p>
       </div>
 
-      {/* Card Footer: Experience Indicator & Projects */}
-      <div className="border-t border-white/5 pt-3 flex flex-wrap items-center justify-between gap-2 font-mono text-[10.5px] uppercase tracking-wider text-gray-400">
-        {/* Experience Indicator Gauge */}
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">EXP:</span>
-          <div className="flex items-center gap-1" aria-label={`Experience level ${experienceYears} of 5`}>
-            {Array.from({ length: 5 }, (_, index) => {
-              const isFilled = index < experienceYears;
-              return (
-                <span
-                  key={index}
-                  className={`h-1.5 w-3 rounded-2xs transition-colors ${
-                    isFilled ? `${currentStatus.dot} opacity-95` : "bg-white/10"
-                  }`}
-                  aria-hidden="true"
-                />
-              );
-            })}
-          </div>
-          <span className="font-bold text-gray-300">
-            {experienceYears === 1 ? "1 YR" : `${experienceYears} YRS`}
-          </span>
+      {projectsCount > 0 && (
+        <div className="flex items-center gap-1 border-t border-white/5 pt-3 font-mono text-xs text-gray-300">
+          <Database className="h-3 w-3 shrink-0 text-neon-lime" aria-hidden="true" />
+          Used in {projectsCount} portfolio {projectsCount === 1 ? "project" : "projects"}
         </div>
-
-        {/* Projects count */}
-        <div className="flex items-center gap-1 text-gray-400 group-hover:text-neon-lime transition-colors">
-          <Database className="h-3 w-3 text-neon-lime" aria-hidden="true" />
-          <span className="font-bold text-gray-300 group-hover:text-white">
-            {projectsCount} {projectsCount === 1 ? "BUILD" : "BUILDS"}
-          </span>
-        </div>
-      </div>
+      )}
     </button>
   );
 }

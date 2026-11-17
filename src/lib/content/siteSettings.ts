@@ -18,7 +18,6 @@ export interface SiteSettings {
   supportStatus: string;
   resumeUrl: string;
   anilistUsername?: string;
-  lastfmUsername?: string;
   discordUserId?: string;
   footerLinks: FooterLink[];
 }
@@ -38,7 +37,6 @@ export const siteSettings: SiteSettings = {
   resumeUrl: profile.resumeUrl,
   lastfmUrl: "https://www.last.fm/user/byteprowler",
   anilistUsername: process.env.NEXT_PUBLIC_ANILIST_USERNAME,
-  lastfmUsername: process.env.LASTFM_USERNAME,
   discordUserId: process.env.NEXT_PUBLIC_DISCORD_USER_ID,
   footerLinks: [
     { label: "GITHUB", href: "https://github.com/byteprowler" },

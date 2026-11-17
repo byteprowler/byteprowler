@@ -4,10 +4,9 @@ on:
   push:
     branches:
       - main
-      - 'feature/**'
-      - 'feat/**'
-      - 'fix/**'
-  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -17,11 +16,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          persist-credentials: false
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
         with:
-          version: 9
+          version: 12.14.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v5

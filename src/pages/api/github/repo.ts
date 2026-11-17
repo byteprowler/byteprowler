@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { GithubRepoMetadataResponse } from "../../../lib/github";
+import { projects } from "../../../lib/projects";
 
 const repoSegmentPattern = /^[A-Za-z0-9_.-]+$/;
 
@@ -19,17 +20,21 @@ export default async function handler(
     return res.status(400).json({ ok: false, message: "INVALID_REPO_QUERY" });
   }
 
+  if (!projects.some(project => project.repoVisibility === "public" &&
+    project.useGithubMetadata === true &&
+    project.githubOwner === owner && project.githubRepo === repo)) {
+    return res.status(404).json({ ok: false, message: "GITHUB_REPO_UNAVAILABLE" });
+  }
+
   try {
     const headers: HeadersInit = {
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     };
 
-    if (process.env.GITHUB_TOKEN) {
-      headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
-    }
-
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
+    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers, redirect: "error", signal: AbortSignal.timeout(5000),
+    });
 
     if (!response.ok) {
       res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
@@ -52,14 +57,13 @@ export default async function handler(
         stars: typeof payload.stargazers_count === "number" ? payload.stargazers_count : undefined,
         forks: typeof payload.forks_count === "number" ? payload.forks_count : undefined,
         language: typeof payload.language === "string" ? payload.language : undefined,
-        topics: Array.isArray(payload.topics) ? payload.topics.slice(0, 6) : undefined,
+        topics: Array.isArray(payload.topics) ? payload.topics.filter((topic: unknown) => typeof topic === "string").slice(0, 6) : undefined,
         updatedAt: typeof payload.updated_at === "string" ? payload.updated_at : undefined,
         pushedAt: typeof payload.pushed_at === "string" ? payload.pushed_at : undefined,
         url: typeof payload.html_url === "string" ? payload.html_url : undefined,
       },
     });
-  } catch (error) {
-    console.error("GITHUB_SIGNAL_OFFLINE", error instanceof Error ? error.message : error);
+  } catch {
     res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300");
     return res.status(200).json({ ok: false, message: "GITHUB_SIGNAL_OFFLINE" });
   }
