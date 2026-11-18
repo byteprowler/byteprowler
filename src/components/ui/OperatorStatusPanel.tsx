@@ -2,7 +2,6 @@ import React from "react";
 import { Activity, Code2, Crosshair, Layers, Radio } from "lucide-react";
 import { profile } from "../../lib/profile";
 import OperatorAvatar from "./OperatorAvatar";
-import DeveloperTelemetry from "./DeveloperTelemetry";
 const statusRows = [
   { label: "MODE", value: "Frontend Developer // Systems UI", icon: Code2, tone: "text-neon-blue" },
   { label: "BUILD", value: "Byteprowler v2", icon: Activity, tone: "text-neon-lime" },
@@ -44,7 +43,6 @@ export default function OperatorStatusPanel() {
           })}
         </div>
       </div>
-      <DeveloperTelemetry />
       <div className="rounded-sm border border-neon-lime/15 bg-neon-lime/5 px-3 py-2.5 text-[11px] leading-relaxed text-gray-200">
         <div className="mb-1 flex items-center gap-2 font-black uppercase tracking-widest text-neon-lime">
           <Radio className="h-3.5 w-3.5" aria-hidden="true" />

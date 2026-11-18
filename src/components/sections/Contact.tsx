@@ -1,4 +1,5 @@
-import React, { useState, FormEvent, ChangeEvent } from "react";
+import React, { useRef, useState, FormEvent, ChangeEvent } from "react";
+import { capturePortfolioEvent } from "../../lib/posthog";
 import Link from "next/link";
 import { RiGithubLine } from "react-icons/ri";
 import { FiLinkedin } from "react-icons/fi";
@@ -50,6 +51,7 @@ function getContactEndpoint() {
 }
 
 export default function Contact() {
+  const contactStarted = useRef(false);
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -134,6 +136,8 @@ export default function Contact() {
         throw new Error(resData.message || "CONTACT_TRANSMISSION_FAILED");
       }
 
+      capturePortfolioEvent("portfolio_contact_submitted");
+
       setIsSubmitting(false);
       setSubmitSuccess(true);
       setActiveConsoleLog(
@@ -196,7 +200,12 @@ export default function Contact() {
               </div>
 
               {/* Secure Input Form Block */}
-              <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+              <form onSubmit={handleSubmit} onFocus={() => {
+                if (!contactStarted.current) {
+                  contactStarted.current = true;
+                  capturePortfolioEvent("portfolio_contact_started");
+                }
+              }} noValidate className="flex flex-col gap-5">
                 
                 {/* Responsive Dual Inputs on Desktop, Single Stack on Mobile */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">                  {/* Name field */}

@@ -1,6 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, Code2, GitFork, Github, Radio, Star, Users } from "lucide-react";
+import { Activity, Code2, GitFork, Github, Star, Users } from "lucide-react";
 import { fetchGithubDeveloperTelemetry } from "../../lib/github";
 import { profile } from "../../lib/profile";
 
@@ -29,12 +29,12 @@ function MetricRow({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/5 py-1.5">
+    <div className="flex min-w-0 flex-col gap-2 border-b border-white/5 py-3">
       <dt className="flex min-w-0 items-center gap-2 font-black text-gray-300">
         {icon}
-        <span className="truncate">{label}</span>
+        <span className="break-words">{label}</span>
       </dt>
-      <dd className="min-w-0 text-right font-bold text-white">{value}</dd>
+      <dd className="min-w-0 break-words font-bold text-white">{value}</dd>
     </div>
   );
 }
@@ -58,26 +58,21 @@ export default function DeveloperTelemetry() {
   return (
     <section
       aria-labelledby="developer-telemetry-title"
-      className="rounded-sm border border-neon-blue/15 bg-neon-blue/5 px-3 py-3 font-mono text-[10.5px] uppercase tracking-widest text-gray-300"
+      className="min-w-0 rounded-sm border border-neon-blue/15 bg-neon-blue/5 p-4 font-mono text-xs uppercase text-gray-300"
     >
-      <div className="mb-3 flex items-start justify-between gap-3 border-b border-white/5 pb-2">
+      <div className="mb-3 flex flex-col gap-3 border-b border-white/5 pb-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 id="developer-telemetry-title" className="font-black text-neon-blue">
             BYTEPROWLER TELEMETRY
           </h3>
           <p className="mt-1 text-[10px] text-gray-400">PUBLIC_DEV_SIGNAL</p>
         </div>
-        <span className={status === "DEVELOPER_SIGNAL_ONLINE" ? "font-black text-neon-green" : "font-black text-neon-purple"}>
+        <span className={`break-words ${status === "DEVELOPER_SIGNAL_ONLINE" ? "font-black text-neon-green" : "font-black text-neon-purple"}`}>
           {status}
         </span>
       </div>
 
-      <dl className="flex flex-col gap-1">
-        <MetricRow
-          icon={<Radio className="h-3.5 w-3.5 shrink-0 text-neon-green" aria-hidden="true" />}
-          label="CODE_SIGNAL"
-          value={status === "DEVELOPER_SIGNAL_ONLINE" ? "ONLINE" : "STANDBY"}
-        />
+      <dl className="grid min-w-0 grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
         <MetricRow
           icon={<Activity className="h-3.5 w-3.5 shrink-0 text-neon-lime" aria-hidden="true" />}
           label="BUILDING_SINCE"
@@ -115,11 +110,11 @@ export default function DeveloperTelemetry() {
           href={telemetry.recentlyUpdatedRepo.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 block rounded-sm border border-white/10 bg-black/45 px-3 py-2 text-[10px] font-bold text-gray-300 transition hover:border-neon-blue/35 hover:text-neon-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian"
+          className="mt-3 flex min-w-0 flex-col gap-1 border-t border-white/10 pt-3 text-xs font-bold text-gray-300 transition hover:text-neon-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-blue focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4"
           aria-label={`Open recently updated GitHub repository ${telemetry.recentlyUpdatedRepo.name}`}
         >
           <span className="block font-black text-neon-blue">LATEST_PROJECT_ACTIVITY</span>
-          <span className="mt-1 block truncate text-white">{telemetry.recentlyUpdatedRepo.name}</span>
+          <span className="break-all text-white">{telemetry.recentlyUpdatedRepo.name}</span>
           <span className="mt-1 block text-gray-400">
             PUSHED: {formatDate(telemetry.recentlyUpdatedRepo.pushedAt || telemetry.recentlyUpdatedRepo.updatedAt)}
           </span>

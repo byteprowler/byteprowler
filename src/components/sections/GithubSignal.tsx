@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Github } from "lucide-react";
+import { capturePortfolioEvent } from "../../lib/posthog";
 
 
 interface GithubActivity {
@@ -88,9 +89,10 @@ export default function GithubSignal() {
                     </span>
                 </div>
                 <button
-                    onClick={() =>
-                        refetch()
-                    }
+                    onClick={() => {
+                        capturePortfolioEvent("portfolio_activity_refreshed", { activity_type: "github" });
+                        void refetch();
+                    }}
                     className="text-xs border border-neon-lime/30 px-3 py-2 rounded hover:bg-neon-lime/10"
                 >
 

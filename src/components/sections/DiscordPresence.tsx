@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React from "react";
+import { capturePortfolioEvent } from "../../lib/posthog";
 import { useQuery } from "@tanstack/react-query";
 import { Gamepad2, RefreshCw, ShieldAlert, Signal, UserRound } from "lucide-react";
 import { fetchDiscordPresence } from "../../lib/discordPresence";
@@ -52,7 +53,10 @@ export default function DiscordPresence() {
         </div>
         <button
           type="button"
-          onClick={() => void refetch()}
+          onClick={() => {
+            capturePortfolioEvent("portfolio_activity_refreshed", { activity_type: "discord" });
+            void refetch();
+          }}
           disabled={isFetching}
           aria-label="Refresh Discord signal"
           className="inline-flex min-h-10 w-fit items-center gap-2 rounded-sm border border-neon-purple/25 bg-black/60 px-3 py-2 font-mono text-[10.5px] font-black uppercase tracking-widest text-neon-purple transition hover:border-neon-purple hover:bg-neon-purple/10 disabled:cursor-not-allowed disabled:opacity-55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-purple focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian"

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import BootSequence from "../components/ui/BootSequence";
 import CustomCursor from "../components/ui/CustomCursor";
+import { analyticsEnabled, trackPortfolioLink, trackPortfolioPage } from "../lib/posthog";
 import "../styles/globals.css";
 
 const BOOT_SESSION_KEY = "byteprowler_boot_sequence_seen";
@@ -16,6 +17,20 @@ export default function App({ Component, pageProps, router }: AppProps) {
   // Keep the first render identical on the server and client is. The session
   // preference is applied by the effect below after hydration.
   const [isBootComplete, setIsBootComplete] = useState(true);
+
+  useEffect(() => {
+    if (!analyticsEnabled()) return;
+    document.addEventListener("click", trackPortfolioLink);
+    return () => document.removeEventListener("click", trackPortfolioLink);
+  }, []);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    const track = (path: string) => trackPortfolioPage(path);
+    track(router.asPath);
+    router.events.on("routeChangeComplete", track);
+    return () => router.events.off("routeChangeComplete", track);
+  }, [router.isReady, router.events, router.asPath]);
 
   const [queryClient] = useState(
     () =>

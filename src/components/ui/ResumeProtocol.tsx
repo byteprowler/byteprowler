@@ -344,6 +344,7 @@ export default function ResumeProtocol({
                     target="_blank"
                     rel="noopener noreferrer"
                     download
+                    data-portfolio-tracked="true"
                     onClick={handleDownloadClick}
                     className="terminal-button border-transparent bg-neon-lime text-black shadow-glow-lime/10 hover:bg-[#bbf000] hover:shadow-glow-lime/25"
                   >

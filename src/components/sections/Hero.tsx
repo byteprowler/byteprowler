@@ -4,6 +4,7 @@ import { ArrowRight, FileText, Radio } from "lucide-react";
 import { profile } from "../../lib/profile";
 import { getDevUptimeStats } from "../../lib/devStats";
 import OperatorStatusPanel from "../ui/OperatorStatusPanel";
+import DeveloperTelemetry from "../ui/DeveloperTelemetry";
 import ResumeProtocol from "../ui/ResumeProtocol";
 import GlitchBrandTitle from "../ui/GlitchBrandTitle";
 
@@ -39,7 +40,7 @@ export default function Hero() {
   }, [isBooted, taglineText]);
 
   return (
-    <section id="home" className="py-8 md:py-16 w-full flex flex-col gap-10 select-none">
+    <section id="home" className="py-8 md:pt-6 md:pb-8 w-full flex flex-col gap-10 select-none">
 
       {/* Upper Terminal HUD Decorator Module */}
       <div className="w-full flex justify-between items-center border border-neon-lime/10 bg-black/40 px-4 py-2.5 rounded-sm overflow-hidden text-xs font-mono text-gray-300 shadow-glow-lime/5">
@@ -57,10 +58,10 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch pt-2">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pt-2">
 
         {/* Main Content Pane */}
-        <div className="col-span-12 md:col-span-8 flex flex-col justify-center gap-8 relative">
+        <div className="col-span-1 md:col-span-8 min-w-0 flex flex-col gap-8 relative">
 
           {/* Subtle hacker matrix lines panel */}
           <div className="absolute -left-4 top-1/4 w-1 h-3/4 border-l border-neon-lime/20 flex flex-col justify-between py-1 pointer-events-none">
@@ -215,11 +216,13 @@ export default function Hero() {
         </div>
 
         {/* Operator status module (right side panel) */}
-        <div className="col-span-12 md:col-span-4 flex flex-col justify-center">
+        <div className="col-span-1 md:col-span-4 min-w-0 flex flex-col">
           <OperatorStatusPanel />
         </div>
 
       </div>
+
+      <DeveloperTelemetry />
 
       <ResumeProtocol
         isOpen={isResumeProtocolOpen}

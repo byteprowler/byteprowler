@@ -32,7 +32,7 @@ export default function About() {
   ];
 
   return (
-    <section id="about" className="py-12 md:py-24 border-t border-neon-lime/5 scroll-mt-20">
+    <section id="about" className="py-12 md:pt-12 md:pb-24 border-t border-neon-lime/5 scroll-mt-20">
 
       {/* Section Indicator HUD */}
       <div className="flex items-center gap-2 mb-8 font-mono text-xs text-gray-400">

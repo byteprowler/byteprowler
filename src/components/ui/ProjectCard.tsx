@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Code2, ExternalLink, FolderClosed, Github, GitFork, Star } from "lucide-react";
 import { Project } from "../../lib/projects";
 import { fetchGithubRepoMetadata } from "../../lib/github";
+import { trackProjectLink } from "../../lib/posthog";
 
 interface ProjectCardProps {
     project: Project;
@@ -134,6 +135,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     {githubHref && (
                         <a
                             href={githubHref}
+                            data-portfolio-tracked="true"
+                            onClick={() => trackProjectLink("github", project, githubHref)}
                             target="_blank"
                             referrerPolicy="no-referrer"
                             rel="noopener noreferrer"
@@ -148,6 +151,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
                     {project.liveUrl && (
                         <a
                             href={project.liveUrl}
+                            data-portfolio-tracked="true"
+                            onClick={() => trackProjectLink("live", project, project.liveUrl!)}
                             target="_blank"
                             referrerPolicy="no-referrer"
                             rel="noopener noreferrer"

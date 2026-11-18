@@ -7,6 +7,7 @@ import type { LastFmTrack } from "../../lib/lastfm";
 import { siteSettings } from "../../lib/content/siteSettings";
 import TrackCard from "../ui/TrackCard";
 import DiscordPresence from "./DiscordPresence";
+import { capturePortfolioEvent } from "../../lib/posthog";
 
 type SignalTab = "anilist" | "music" | "discord";
 
@@ -130,7 +131,10 @@ function AniListActivityPanel() {
       signal="ANILIST_ACTIVITY"
       lastSyncedAt={dataUpdatedAt}
       isFetching={isFetching}
-      onRefresh={() => void refetch()}
+      onRefresh={() => {
+        capturePortfolioEvent("portfolio_activity_refreshed", { activity_type: "anilist" });
+        void refetch();
+      }}
       disabled={!hasUsername || isFetching}
       ariaLabel="Refresh AniList activity signal"
     />
@@ -190,6 +194,7 @@ function MusicLogPanel() {
       lastSyncedAt={dataUpdatedAt}
       isFetching={isFetching}
       onRefresh={() => {
+        capturePortfolioEvent("portfolio_activity_refreshed", { activity_type: "music" });
         setRefreshNonce(Date.now());
       }}
       disabled={false}

@@ -7,6 +7,7 @@ import { getProjectBySlug, projects } from "../../lib/projects";
 import { fetchGithubRepoMetadata } from "../../lib/github";
 import Layout from "../../components/layout/Layout";
 import SEO from "../../components/seo/SEO";
+import { trackProjectLink } from "../../lib/posthog";
 import { canonicalUrl, absoluteImage } from "../../lib/site";
 
 interface ProjectDetailProps {
@@ -185,6 +186,8 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
                       {version.liveUrl && (
                         <a
                           href={version.liveUrl}
+                          data-portfolio-tracked="true"
+                          onClick={() => trackProjectLink("live", project, version.liveUrl!)}
                           target="_blank"
                           rel="noopener noreferrer"
                           referrerPolicy="no-referrer"
@@ -316,6 +319,8 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
                 {githubHref && (
                   <a
                     href={githubHref}
+                    data-portfolio-tracked="true"
+                    onClick={() => trackProjectLink("github", project, githubHref)}
                     target="_blank"
                     referrerPolicy="no-referrer"
                     rel="noopener noreferrer"
@@ -329,6 +334,8 @@ export default function ProjectDetail({ slug, onBack }: ProjectDetailProps) {
                 {project.liveUrl && (
                   <a
                     href={project.liveUrl}
+                    data-portfolio-tracked="true"
+                    onClick={() => trackProjectLink("live", project, project.liveUrl!)}
                     target="_blank"
                     referrerPolicy="no-referrer"
                     rel="noopener noreferrer"
