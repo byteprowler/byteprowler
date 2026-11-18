@@ -23,8 +23,8 @@ let isPostHogBooted = false;
 
 function getPostHogConfig() {
   return {
-    key: process.env.POSTHOG_KEY,
-    host: process.env.POSTHOG_HOST || "https://us.i.posthog.com",
+    key: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
   };
 }
 

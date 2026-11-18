@@ -1,4 +1,4 @@
-const configuredOrigin = process.env.SITE_URL || "https://byteprowler.vercel.app";
+const configuredOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://byteprowler.vercel.app";
 function productionOrigin(value: string) {
   try {
     const url = new URL(value);

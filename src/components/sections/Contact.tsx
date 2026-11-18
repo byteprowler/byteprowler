@@ -39,7 +39,7 @@ interface ContactApiResponse {
   message?: string;
 }
 
-const contactApiBaseUrl = process.env.CONTACT_API_URL;
+const contactApiBaseUrl = process.env.NEXT_PUBLIC_CONTACT_API_URL;
 
 function getContactEndpoint() {
   if (!contactApiBaseUrl) {
