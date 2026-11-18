@@ -19,7 +19,7 @@ export default function Layout({ children }: LayoutProps) {
             {children}
           </div>
 
-          <aside className="hidden 2xl:flex lg:col-span-2 xl:col-span-1 flex-col items-end fixed right-8 top-1/4 z-50 h-auto">
+          <aside className="hidden lg:flex lg:col-span-2 xl:col-span-1 flex-col items-end fixed right-8 top-1/4 z-50 h-auto">
             <div className="border border-neon-lime/10 bg-black/60 backdrop-blur-md p-4 rounded-sm flex flex-col gap-5 text-right w-48 neon-border-lime">
               <div className="text-[11px] text-neon-lime/60 font-mono tracking-widest uppercase border-b border-neon-lime/20 pb-2">
                 [ SEC_INDEX_v1.0.4 ]
