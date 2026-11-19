@@ -15,6 +15,7 @@ import Layout from "../components/layout/Layout";
 import SEO from "../components/seo/SEO";
 import TechCard from "../components/ui/TechCard";
 import TechDetailModal from "../components/ui/TechDetailModal";
+import { capturePortfolioEvent } from "../lib/posthog";
 import {
   techCategories,
   techStack,
@@ -95,6 +96,12 @@ export default function TechArsenalPage() {
   }, []);
 
   const handleCardClick = useCallback((tech: TechItem, nodeId: string) => {
+    capturePortfolioEvent("portfolio_tech_inspected", {
+      technology_name: tech.name,
+      technology_category: normalizeCategory(tech.category),
+      technology_status: tech.status,
+      technology_node_id: nodeId,
+    });
     setSelectedTech(tech);
     setSelectedNodeId(nodeId);
   }, []);

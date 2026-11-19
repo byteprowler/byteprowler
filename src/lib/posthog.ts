@@ -9,19 +9,21 @@ type ResumeEventName = "resume_protocol_opened" | "resume_role_selected" | "resu
 type EventName = ResumeEventName | "$pageview" | "portfolio_project_viewed" | "portfolio_github_clicked" |
   "portfolio_live_project_clicked" | "portfolio_contact_started" | "portfolio_contact_submitted" |
   "portfolio_resume_viewed" | "portfolio_resume_downloaded" | "portfolio_external_link_clicked" |
-  "portfolio_activity_refreshed";
+  "portfolio_activity_refreshed" | "portfolio_tech_inspected";
 
 const eventNames = new Set<string>([
-  "$pageview", "portfolio_project_viewed", "portfolio_github_clicked", "portfolio_live_project_clicked",
-  "portfolio_contact_started", "portfolio_contact_submitted", "portfolio_resume_viewed", "portfolio_resume_downloaded",
-  "portfolio_external_link_clicked", "portfolio_activity_refreshed", "resume_protocol_opened", "resume_role_selected",
-  "resume_focus_selected", "resume_recommendation_generated", "resume_download_clicked", "resume_protocol_closed",
+  "$pageview", "$pageleave", "$autocapture", "$exception", "portfolio_project_viewed", "portfolio_github_clicked",
+  "portfolio_live_project_clicked", "portfolio_contact_started", "portfolio_contact_submitted", "portfolio_resume_viewed",
+  "portfolio_resume_downloaded", "portfolio_external_link_clicked", "portfolio_activity_refreshed", "portfolio_tech_inspected",
+  "resume_protocol_opened", "resume_role_selected", "resume_focus_selected", "resume_recommendation_generated", "resume_download_clicked",
+  "resume_protocol_closed",
 ]);
 
 const eventFields = new Set([
   "project_slug", "project_title", "project_category", "project_status", "destination_host",
   "activity_type", "resume_id", "source", "step", "hadRecommendation", "role",
   "focusAreas", "count", "recommendedResumeId", "recommendedResumeLabel", "selectedRole", "focusCount",
+  "technology_name", "technology_category", "technology_status", "technology_node_id",
 ]);
 const sdkFields = new Set([
   "distinct_id", "$device_id", "$session_id", "$window_id", "$lib", "$lib_version",
@@ -65,32 +67,37 @@ export function filterEventProperties(properties: Record<string, unknown>) {
   return result;
 }
 
-function initAnalytics(): Promise<PostHog | null> {
+export function initializePostHog(): Promise<PostHog | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
+
+  const token = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST;
+  if (!token || !host) {
+    if (process.env.NODE_ENV !== "production") {
+      const missing = token ? "NEXT_PUBLIC_POSTHOG_HOST" : "NEXT_PUBLIC_POSTHOG_KEY";
+      console.error(new Error(`${missing} variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once ${missing} is configured`));
+    }
+    return Promise.resolve(null);
+  }
   if (!analyticsEnabled()) return Promise.resolve(null);
   if (loading) return loading;
+
   loading = import("posthog-js").then(({ default: sdk }) => {
-    const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com";
     const parsed = new URL(host);
     if (parsed.protocol !== "https:" || parsed.username || parsed.password) return null;
-    return sdk.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+    return sdk.init(token, {
       api_host: parsed.origin,
-      autocapture: false,
-      capture_pageview: false,
-      capture_pageleave: false,
-      capture_dead_clicks: false,
-      capture_exceptions: false,
-      capture_heatmaps: false,
-      capture_performance: false,
-      cross_subdomain_cookie: false,
-      persistence_name: "byteprowler-portfolio",
-      disable_session_recording: true,
-      disable_surveys: true,
-      person_profiles: "never",
-      advanced_disable_flags: true,
-      enable_recording_console_log: false,
-      before_send: event => event && eventNames.has(event.event)
-        ? { ...event, properties: filterEventProperties(event.properties || {}) }
-        : null,
+      defaults: "2026-08-30",
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
+      before_send: event => event?.event === "$exception"
+        ? event
+        : event && eventNames.has(event.event)
+          ? { ...event, properties: filterEventProperties(event.properties || {}) }
+          : null,
       loaded: client => client.register({ app: APP, host: PRODUCTION_HOST }),
     }, "byteprowler") || null;
   }).catch(() => null);
@@ -103,7 +110,7 @@ export function capturePortfolioEvent(event: EventName, properties: Properties =
   for (const [key, value] of Object.entries(properties)) if (eventFields.has(key)) safe[key] = value;
   const pathname = publicPage(pagePath || window.location.pathname);
   if (!pathname) return;
-  void initAnalytics().then(client => {
+  void initializePostHog().then(client => {
     client?.capture(event, { ...safe, app: APP, host: PRODUCTION_HOST, $pathname: pathname });
   }).catch(() => { /* Analytics must not affect the visitor's action. */ });
 }

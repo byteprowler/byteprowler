@@ -9,6 +9,7 @@ function environment(hostname = "byteprowler.vercel.app", pathname = "/") {
   vi.stubGlobal("window", { location: { hostname, pathname, origin: `https://${hostname}` } });
   vi.stubEnv("NODE_ENV", "production");
   vi.stubEnv("NEXT_PUBLIC_POSTHOG_KEY", "unit-test-project-token");
+  vi.stubEnv("NEXT_PUBLIC_POSTHOG_HOST", "https://analytics.example");
   vi.stubEnv("NEXT_PUBLIC_VERCEL_ENV", "production");
 }
 
@@ -56,14 +57,14 @@ describe("portfolio analytics boundaries", () => {
     expect(mocks.init).not.toHaveBeenCalled();
   });
 
-  it("initializes once, manually tracks one pageview and rejects caller identity overrides", async () => {
+  it("initializes once with default capture and rejects caller identity overrides", async () => {
     const analytics = await import("../../lib/posthog");
     analytics.trackPortfolioPage("/");
     analytics.trackPortfolioPage("/?email=excluded#contact");
     analytics.capturePortfolioEvent("portfolio_contact_submitted", { app: "other-app", email: "must-not-send" });
     await settle();
     expect(mocks.init).toHaveBeenCalledTimes(1);
-    expect(mocks.init.mock.calls[0][1]).toMatchObject({ autocapture: false, capture_pageview: false, disable_session_recording: true, person_profiles: "never", capture_performance: false });
+    expect(mocks.init.mock.calls[0][1]).toMatchObject({ api_host: "https://analytics.example", defaults: "2026-08-30" });
     expect(mocks.capture.mock.calls.filter(([event]) => event === "$pageview")).toHaveLength(1);
     for (const [, properties] of mocks.capture.mock.calls) {
       expect(properties).toMatchObject({ app: "byteprowler-portfolio", host: "byteprowler.vercel.app" });
