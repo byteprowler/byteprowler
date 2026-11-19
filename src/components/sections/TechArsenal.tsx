@@ -4,6 +4,7 @@ import { ArrowUpRight, Cpu, Globe, Terminal } from "lucide-react";
 import { techStack, TechItem } from "../../lib/content/techStack";
 import TechCard from "../ui/TechCard";
 import TechDetailModal from "../ui/TechDetailModal";
+import { capturePortfolioEvent } from "../../lib/posthog";
 
 export default function TechArsenal() {
   // Show only 6-8 important technologies from current/core stack only
@@ -17,6 +18,12 @@ export default function TechArsenal() {
   const handleCardClick = (tech: TechItem, nodeId: string) => {
     setSelectedTech(tech);
     setSelectedNodeId(nodeId);
+    capturePortfolioEvent("portfolio_tech_inspected", {
+      tech_node_id: nodeId,
+      technology_category: tech.category,
+      technology_status: tech.status,
+      source: "tech_preview",
+    });
   };
 
   return (

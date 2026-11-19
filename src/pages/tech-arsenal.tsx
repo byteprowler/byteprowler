@@ -15,6 +15,7 @@ import Layout from "../components/layout/Layout";
 import SEO from "../components/seo/SEO";
 import TechCard from "../components/ui/TechCard";
 import TechDetailModal from "../components/ui/TechDetailModal";
+import { capturePortfolioEvent } from "../lib/posthog";
 import {
   techCategories,
   techStack,
@@ -97,7 +98,31 @@ export default function TechArsenalPage() {
   const handleCardClick = useCallback((tech: TechItem, nodeId: string) => {
     setSelectedTech(tech);
     setSelectedNodeId(nodeId);
+    capturePortfolioEvent("portfolio_tech_inspected", {
+      tech_node_id: nodeId,
+      technology_category: tech.category,
+      technology_status: tech.status,
+      source: "tech_arsenal",
+    });
   }, []);
+
+  const handleCategoryChange = useCallback((category: TechCategoryId) => {
+    if (category === activeCategory) return;
+    setActiveCategory(category);
+    capturePortfolioEvent("portfolio_tech_filter_updated", {
+      filter_type: "category",
+      filter_value: category,
+    });
+  }, [activeCategory]);
+
+  const handleStatusChange = useCallback((status: "ALL" | TechStatus) => {
+    if (status === selectedStatus) return;
+    setSelectedStatus(status);
+    capturePortfolioEvent("portfolio_tech_filter_updated", {
+      filter_type: "status",
+      filter_value: status,
+    });
+  }, [selectedStatus]);
 
   const handleResetFilters = useCallback(() => {
     setQuery("");
@@ -253,7 +278,7 @@ export default function TechArsenalPage() {
                       type="button"
                       role="tab"
                       aria-selected={isActive}
-                      onClick={() => setActiveCategory(category.id)}
+                      onClick={() => handleCategoryChange(category.id)}
                       className={`inline-flex min-h-10 items-center gap-2 rounded-xs border px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neon-lime focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian ${
                         isActive
                           ? "border-neon-lime bg-neon-lime text-black shadow-[0_0_12px_rgba(197,255,0,0.3)]"
@@ -286,7 +311,7 @@ export default function TechArsenalPage() {
                       <button
                         key={status}
                         type="button"
-                        onClick={() => setSelectedStatus(status)}
+                        onClick={() => handleStatusChange(status)}
                         className={`rounded-2xs px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider transition ${
                           isStatusActive
                             ? "bg-white/20 text-white font-black"

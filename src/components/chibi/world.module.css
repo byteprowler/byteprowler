@@ -1,0 +1,304 @@
+:global(html):has(.world) { scrollbar-color: #a580a0 #e9d7e1; }
+
+.world {
+  min-height: 100svh;
+  padding: clamp(.7rem, 2vh, 1.3rem) max(1rem, env(safe-area-inset-right)) 1rem;
+  color: #38283e;
+  background: radial-gradient(ellipse at 50% 15%, #fbecdc, #e9d7e1 85%);
+  font-family: system-ui, sans-serif;
+  --scene-width: min(100%, max(760px, calc((100svh - 8.5rem) * 1.277)), 1160px);
+}
+
+.header, .scene { width: var(--scene-width); margin-inline: auto; }
+.header {
+  margin-bottom: .85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+.header span, .header a, .sceneFooter span, .dialogHeader {
+  font-size: .69rem;
+  font-weight: 750;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.header span b { color: #8a5575; }
+.header h1 { margin-top: .2rem; font: 500 clamp(1.05rem, 2.2vw, 1.55rem)/1.15 Georgia, serif; }
+.header a {
+  display: grid;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: .65rem;
+  text-align: right;
+  text-underline-offset: .25em;
+  text-decoration: underline;
+}
+
+.scene { min-width: 0; }
+.stage {
+  --depth-x: var(--room-x, 0px);
+  --depth-y: var(--room-y, 0px);
+  isolation: isolate;
+  position: relative;
+  aspect-ratio: 600 / 470;
+  border: 2px solid #614868;
+  border-radius: clamp(16px, 3vw, 28px);
+  overflow: hidden;
+  background: #e4c9e2;
+  box-shadow: 0 6px 0 #ccb0c9, 0 17px 32px #56315a26;
+}
+.backgroundLayer, .midgroundLayer, .foregroundLayer, .characterLayer, .hotspot {
+  transition: translate 240ms ease-out;
+}
+.backgroundLayer { translate: calc(var(--depth-x) * -.38) calc(var(--depth-y) * -.38); }
+.midgroundLayer, .hotspot { translate: calc(var(--depth-x) * .65) calc(var(--depth-y) * .65); }
+.foregroundLayer { translate: var(--depth-x) var(--depth-y); }
+.characterLayer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  translate: calc(var(--depth-x) * .76) calc(var(--depth-y) * .76);
+}
+.sceneFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem 1.5rem;
+  padding-block: .95rem .25rem;
+  color: #583e57;
+  font-size: .77rem;
+}
+.sceneFooter span { display: flex; align-items: center; gap: .4rem; white-space: nowrap; }
+.sceneFooter i { width: 7px; aspect-ratio: 1; border-radius: 50%; background: #527166; }
+
+.character {
+  position: absolute;
+  /* Match the room's 600 × 470 viewBox and the mascot's 120 × 140 artboard. */
+  width: 21%;
+  left: 14%;
+  top: 55%;
+  pointer-events: none;
+  transition: transform 470ms ease-in-out;
+}
+
+.character[data-pose="walking"] { transform: translate(164%, -19%); }
+.character:is([data-pose="sitting"], [data-pose="openingLaptop"], [data-pose="typing"]) {
+  /* The seated hip lands on the stool and the reach lands at the laptop hinge. */
+  transform: translate(164%, -31%);
+  transition-duration: 160ms;
+}
+
+.characterShadow { transition: opacity 160ms ease; }
+.character:is([data-pose="sitting"], [data-pose="openingLaptop"], [data-pose="typing"]) .characterShadow { opacity: 0; }
+
+.nearLeg { transform-origin: 49px 105px; }
+.farLeg { transform-origin: 64px 105px; }
+.nearArm { transform-origin: 48px 84px; }
+.farArm { transform-origin: 72px 81px; }
+
+.character[data-pose="walking"] :is(.nearLeg, .farLeg, .nearArm, .farArm) {
+  animation: stride 230ms ease-in-out 2;
+}
+.character[data-pose="walking"] :is(.farLeg, .nearArm) { animation-direction: reverse; }
+.character[data-pose="walking"] .characterFigure { animation: footfall 115ms ease-in-out 4; }
+
+@keyframes stride {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-23deg); }
+  75% { transform: rotate(23deg); }
+}
+
+@keyframes footfall { 50% { transform: translateY(-2px); } }
+
+.closedEyes { opacity: 0; }
+.stage[data-gesture="blink"] .openEyes { opacity: 0; }
+.stage[data-gesture="blink"] .closedEyes { opacity: 1; }
+.stage[data-phase="notice"] .characterHead { animation: look 240ms ease-in-out; }
+.stage[data-gesture="glance"] .characterHead,
+.stage[data-object]:not([data-object="laptop"]) .characterHead { animation: look 750ms ease-in-out; transform-origin: 65px 70px; }
+.stage[data-gesture="stretch"] .characterFigure { animation: stretch 800ms ease-in-out; transform-origin: 60px 133px; }
+@keyframes look { 40%, 65% { transform: rotate(5deg) translateX(2px); } }
+@keyframes stretch { 45% { transform: scaleY(1.045); } }
+
+.stage[data-phase="type"] .nearHand { animation: keystroke 115ms ease-in-out 3; }
+.stage[data-phase="type"] .farHand { animation: keystroke 115ms ease-in-out 3 reverse; }
+.stage[data-phase="type"] .characterHead { animation: glance 320ms ease-in-out; }
+@keyframes keystroke {
+  25% { transform: translateY(-2px); }
+  75% { transform: translateY(1px); }
+}
+@keyframes glance { 60% { transform: translateY(1.5px); } }
+
+.hotspot {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  width: max(44px, var(--size, 10%));
+  height: max(44px, var(--height, 9%));
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  color: #3e2947;
+  cursor: pointer;
+  touch-action: manipulation;
+  border-radius: .65rem;
+}
+.hotspot[data-hotspot="bookshelf"] { --x: 63%; --y: 14.9%; --size: 12%; --height: 10%; }
+.hotspot[data-hotspot="manga"] { --x: 78%; --y: 14.9%; }
+.hotspot[data-hotspot="headphones"] { --x: 85%; --y: 35.5%; --size: 10.5%; }
+.hotspot[data-hotspot="phone"] { --x: 45.5%; --y: 58%; --size: 11%; --height: 11%; }
+.hotspot[data-hotspot="desk"] { --x: 79.5%; --y: 74.8%; --size: 12%; --height: 10%; }
+.hotspot[data-hotspot="laptop"] {
+  top: 49.5%;
+  left: 62%;
+  width: 24%;
+  height: auto;
+  min-height: 44px;
+  transform: none;
+}
+.hotspot[data-hotspot="desk"] .propArt { translate: 0 -14%; }
+.propArt { width: 100%; height: 100%; overflow: visible; transition: transform 160ms ease; }
+.hotspot:is(:hover, :focus-visible) .propArt { transform: translateY(-3px); }
+.hotspot:is(:hover, :focus-visible) { z-index: 2; }
+.laptopArt { display: block; width: 86%; overflow: visible; }
+.marker {
+  position: absolute;
+  top: 64%;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: clamp(15px, 2.7vw, 23px);
+  aspect-ratio: 1;
+  border: 1px solid #745273;
+  border-radius: 50%;
+  box-shadow: 0 2px #68486e42;
+  background: #fff2d6;
+  font: 800 clamp(.63rem, 1.5vw, .83rem)/1 system-ui, sans-serif;
+}
+.hotspot[data-hotspot="laptop"] .marker { right: 10%; top: 67%; }
+.hotspot:is(:hover, :focus-visible) .marker { color: #fff5de; background: #624568; }
+.objectLabel {
+  pointer-events: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: max-content;
+  padding: .24rem .48rem;
+  border-radius: .38rem;
+  background: #3f2b47;
+  color: #fff3e1;
+  font-size: .7rem;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.hotspot:is(:hover, :focus-visible) .objectLabel,
+.stage:not([data-phase="idle"]) .hotspot[data-hotspot="laptop"] .objectLabel { opacity: 1; }
+
+.lid { transform-box: fill-box; transform-origin: center bottom; transform: scaleY(.24); transition: transform 200ms ease; }
+.stage:is([data-phase="open"], [data-phase="type"], [data-phase="projects"]) .lid { transform: scaleY(1); }
+.screen { opacity: 0; transition: opacity 180ms ease; }
+.stage:is([data-phase="type"], [data-phase="projects"]) .screen { opacity: 1; }
+
+.plantLeaves {
+  transform-origin: 120px 341px;
+  animation: leaves 9s ease-in-out 2;
+}
+@keyframes leaves { 42%, 58% { transform: rotate(2deg); } }
+
+.world :focus-visible { outline: 3px solid #54296b; outline-offset: 3px; }
+
+.dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(calc(100% - 1.5rem), 29rem);
+  max-height: 85dvh;
+  overflow: auto;
+  color: #392842;
+  background: #fff3e4;
+  border: 2px solid #614868;
+  border-radius: 1rem;
+  box-shadow: 0 6px #a07e9d;
+}
+.dialog[open] { animation: reveal 180ms ease-out; }
+.dialog::backdrop { background: #35253e73; }
+.dialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .55rem;
+  padding: .3rem .85rem;
+  background: #e7d2e6;
+  border-bottom: 1px solid #aa8ca9;
+}
+.dialog[data-panel="laptop"] .dialogHeader { background: #d1dfc9; }
+.dialogHeader button {
+  min-height: 44px;
+  padding: .1rem .35rem;
+  text-transform: none;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.dialogHeader button span { margin-left: .35rem; font-size: 1rem; }
+.panelBody { padding: clamp(1rem, 5vw, 2rem); }
+.panelBody h2 { font: 500 clamp(2.2rem, 7vw, 3.2rem)/1 Georgia, serif; }
+.panelBody p { margin: .85rem 0 1.25rem; max-width: 41ch; line-height: 1.55; }
+.primary { display: inline-flex; gap: .6rem; align-items: center; min-height: 44px; padding: .45rem .8rem; border-radius: .55rem; background: #573460; color: #fff6e8; font-weight: 700; }
+@keyframes reveal { from { opacity: 0; transform: translateY(6px); } }
+
+@media (max-width: 759px) {
+  .world { --scene-width: min(100%, 600px); }
+  .stage { border-radius: 17px; }
+  .roomDetail { display: none; }
+  .stage:is([data-phase="idle"], [data-phase="notice"]) .characterFigure {
+    scale: 1.1;
+    transform-origin: 60px 133px;
+  }
+  .sceneFooter span { display: none; }
+}
+
+@media (max-width: 459px), (hover: none) {
+  .world { padding-inline: .65rem; }
+  .header span, .header a { font-size: .62rem; }
+  .header a { padding-inline: .15rem; }
+  .objectLabel {
+    bottom: auto;
+    top: calc(100% - .25rem);
+    font-size: .6rem;
+    padding: .1rem .25rem;
+    background: #fff3df;
+    color: #503354;
+    opacity: 1;
+  }
+  .hotspot:is(:hover, :focus-visible) .objectLabel { background: #4f3455; color: #fff5e7; }
+  .hotspot[data-hotspot="laptop"] .objectLabel { top: calc(100% - .5rem); }
+  .hotspot[data-hotspot="headphones"] .objectLabel { left: 43%; }
+  .hotspot[data-hotspot="desk"] .objectLabel { top: calc(100% - .55rem); }
+  .sceneFooter { padding-inline: .2rem; }
+}
+
+@media (hover: none), (pointer: coarse), (max-width: 759px), (prefers-reduced-motion: reduce) {
+  .stage { --depth-x: 0px; --depth-y: 0px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .world .stage[data-phase] [class],
+  .world .dialog[open] { animation: none; transition: none; }
+}
+
+.objectLabel small { display: block; font-weight: 500; font-size: .65rem; }
+@media (max-width: 459px), (hover: none) { .objectLabel small { display: none; } }
+
+@media (max-width: 459px) {
+  .stage { aspect-ratio: 600 / 660; container-type: inline-size; }
+  .character { top: calc(85% - 23.5cqw); }
+  .character[data-pose="walking"] { transform: translate(164%, -26%); }
+  .character:is([data-pose="sitting"], [data-pose="openingLaptop"], [data-pose="typing"]) {
+    transform: translate(164%, -47%);
+  }
+  .hotspot[data-hotspot="laptop"] { top: 55.5%; }
+  .hotspot[data-hotspot="desk"] { --y: 78%; }
+  .hotspot[data-hotspot="desk"] .propArt { translate: 0 -30%; }
+}

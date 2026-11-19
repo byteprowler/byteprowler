@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { logPortfolioServiceOutcome } from "../../lib/posthogLogs";
 import { getSupabaseAdmin } from "../../lib/supabaseAdmin";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -8,7 +9,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "METHOD_NOT_ALLOWED" });
   }
   const supabase = getSupabaseAdmin();
-  if (!supabase) return res.status(503).json({ message: "VIEW_SIGNAL_UNAVAILABLE" });
+  if (!supabase) {
+    await logPortfolioServiceOutcome({ event: "portfolio_view_counter_unavailable" });
+    return res.status(503).json({ message: "VIEW_SIGNAL_UNAVAILABLE" });
+  }
   const viewKey = process.env.BYTEPROWLER_VIEW_KEY || "byteprowler:portfolio:views";
   try {
     if (req.method === "GET") {
@@ -24,8 +28,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (error) throw error;
     const result = Array.isArray(data) ? data[0] : data;
     if (!result || !Number.isFinite(Number(result.total))) throw new Error("Invalid counter result");
+    await logPortfolioServiceOutcome({
+      event: "portfolio_view_counter_recorded",
+      counted: Boolean(result.counted),
+    });
     return res.status(200).json({ count: Number(result.total), counted: result.counted, cooldownActive: !result.counted });
   } catch {
+    await logPortfolioServiceOutcome({ event: "portfolio_view_counter_unavailable" });
     console.error("VIEW_SIGNAL_UNAVAILABLE: check Supabase configuration and counter migration");
     return res.status(503).json({ message: "VIEW_SIGNAL_UNAVAILABLE" });
   }

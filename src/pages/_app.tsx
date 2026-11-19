@@ -4,19 +4,29 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import BootSequence from "../components/ui/BootSequence";
 import CustomCursor from "../components/ui/CustomCursor";
-import { analyticsEnabled, trackPortfolioLink, trackPortfolioPage } from "../lib/posthog";
+import { analyticsEnabled, initializePostHog, trackPortfolioLink, trackPortfolioPage } from "../lib/posthog";
 import "../styles/globals.css";
 
 const BOOT_SESSION_KEY = "byteprowler_boot_sequence_seen";
 const BOOT_COMPLETE_EVENT = "byteprowler:boot-complete";
 
-export default function App({ Component, pageProps, router }: AppProps) {
+export default function App(props: AppProps) {
+  const { Component, pageProps, router } = props;
+  if (router.pathname === "/experimental") return <Component {...pageProps} />;
+  return <TerminalApp {...props} />;
+}
+
+function TerminalApp({ Component, pageProps, router }: AppProps) {
   const shouldReduceMotion = useReducedMotion();
   const isHomePage = router.pathname === "/";
 
   // Keep the first render identical on the server and client is. The session
   // preference is applied by the effect below after hydration.
   const [isBootComplete, setIsBootComplete] = useState(true);
+
+  useEffect(() => {
+    void initializePostHog();
+  }, []);
 
   useEffect(() => {
     if (!analyticsEnabled()) return;
