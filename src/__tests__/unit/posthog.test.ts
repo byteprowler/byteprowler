@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -86,11 +87,12 @@ describe("portfolio analytics boundaries", () => {
   it("counts a return navigation and keeps the captured route context", async () => {
     const analytics = await import("../../lib/posthog");
     analytics.trackPortfolioPage("/");
-    analytics.trackPortfolioPage("/projects");
+    analytics.trackPortfolioPage("/profile?private=excluded#work");
     analytics.trackPortfolioPage("/");
     await settle();
     const pages = mocks.capture.mock.calls.filter(([event]) => event === "$pageview");
-    expect(pages.map(([, properties]) => properties.$pathname)).toEqual(["/", "/projects", "/"]);
+    expect(pages.map(([, properties]) => properties.$pathname)).toEqual(["/", "/profile", "/"]);
+    expect(mocks.init).toHaveBeenCalledTimes(1);
   });
 
   it("strips SDK URL queries, referrers, person updates, contact data and feed content", async () => {

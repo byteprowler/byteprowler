@@ -43,7 +43,7 @@ export function analyticsEnabled() {
 
 export function publicPage(path: string) {
   const pathname = path.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
-  if (["/", "/projects", "/tech-arsenal"].includes(pathname)) return pathname;
+  if (["/", "/profile", "/projects", "/tech-arsenal"].includes(pathname)) return pathname;
   if (pathname.startsWith("/projects/") && getProjectBySlug(pathname.slice(10))) return pathname;
   return null;
 }

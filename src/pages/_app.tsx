@@ -76,6 +76,8 @@ export default function App({ Component, pageProps, router }: AppProps) {
     }
   }, []);
 
+  if (router.pathname === "/profile") return <Component {...pageProps} />;
+
   return (
     <QueryClientProvider client={queryClient}>
       <CustomCursor />

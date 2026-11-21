@@ -25,11 +25,18 @@ describe("production discovery", () => {
     expect(doc.querySelector("parsererror")).toBeNull();
     const locations = [...doc.querySelectorAll("loc")].map(n => n.textContent);
     expect(locations).toContain(`${SITE_URL}/projects/prowlerpos`);
+    expect(locations).toContain(`${SITE_URL}/profile`);
     for (const project of projects) {
       expect(locations).toContain(canonicalUrl(`/projects/${project.slug}`));
     }
     expect(locations).toHaveLength(publicRoutes.length);
     expect(locations.some(url => url?.includes("/api/"))).toBe(false);
+  });
+  it("ships a dedicated 1200 by 630 social preview for the profile", async () => {
+    const { readFileSync } = await import("node:fs");
+    const preview = readFileSync("public/og-profile.png");
+    expect([preview.readUInt32BE(16), preview.readUInt32BE(20)]).toEqual([1200, 630]);
+    expect(absoluteImage("/og-profile.png")).toBe(`${SITE_URL}/og-profile.png`);
   });
   it("allows public assets and references the canonical sitemap", () => {
     expect(robotsText()).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`);
