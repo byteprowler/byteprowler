@@ -75,7 +75,7 @@ export const projects: Project[] = [
     slug: "email-template",
     title: "Email Template",
     description: "A simple email template showcase with three fictional transactional email designs, built as a static, dependency-free project for demonstration purposes.",
-    longDescription: "EA static, dependency-free showcase of three fictional transactional emails. The original workspace contained only an empty HTML scaffold; no portfolio, framework, build pipeline, or design system existed. Open index.html directly or serve this directory with any static HTTP server.",
+    longDescription: "A static, dependency-free showcase of three fictional transactional emails. The original workspace contained only an empty HTML scaffold; no portfolio, framework, build pipeline, or design system existed. Open index.html directly or serve this directory with any static HTTP server.",
     stack: ["HTML, CSS, JavaScript"],
     type: "Utility Tool",
     status: "COMPLETE",
