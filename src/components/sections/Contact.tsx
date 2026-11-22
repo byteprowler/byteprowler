@@ -350,7 +350,7 @@ export default function Contact() {
                   <span className="text-gray-300 font-bold uppercase flex items-center gap-1.5 label text-[11px]">
                     <Cpu className="w-4 h-4" /> Availability
                   </span>
-                  <span className="text-neon-blue font-bold tracking-tight uppercase text-[10.5px] break-words sm:text-right">
+                  <span className="text-neon-blue font-bold tracking-tight uppercase text-[10.5px] wrap-break-words sm:text-right">
                     OPEN_TO_FRONTEND_AND_FULLSTACK
                   </span>
                 </div>

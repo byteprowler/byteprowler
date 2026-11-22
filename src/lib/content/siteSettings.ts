@@ -26,7 +26,7 @@ export interface SiteSettings {
 // Do not add real Discord RPC to the public portfolio without a clear need.
 export const siteSettings: SiteSettings = {
   githubUrl: "https://github.com/byteprowler",
-  linkedinUrl: "https://linkedin.com/in/ogo-joshua",
+  linkedinUrl: "https://linkedin.com/in/ogojoshua",
   anilistUrl:  `https://anilist.co/user/${process.env.NEXT_PUBLIC_ANILIST_USERNAME}/`,
   discordUrl: `https://discord.com/users/${process.env.NEXT_PUBLIC_DISCORD_USER_ID}`,
   myanimelistUrl: `https://myanimelist.net/profile/${process.env.NEXT_PUBLIC_ANILIST_USERNAME}`,
